@@ -873,12 +873,12 @@ static term_ptr term_new_eq(term_ptr left,term_ptr right)
 {
   type_ptr type = term2type(left);
   know(type_is(type,term2type(right)));
-  type_ptr bool = type_new_bool();
-  type_ptr typetobool = type_new_fun(type,bool);
+  type_ptr booltype = type_new_bool();
+  type_ptr typetobool = type_new_fun(type,booltype);
   type_ptr typetotypetobool = type_new_fun(type,typetobool);
   term_ptr eq = term_new_const(typetotypetobool,str_const_equalssign);
   term_ptr eqleft = term_new_eval(typetobool,eq,left);
-  return term_new_eval(bool,eqleft,right);
+  return term_new_eval(booltype,eqleft,right);
 }
 
 static int term_is_const(term_ptr term,type_ptr *type,str *name)

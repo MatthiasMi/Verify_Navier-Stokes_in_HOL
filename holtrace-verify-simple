@@ -1,0 +1,441 @@
+#!/usr/bin/env pypy3
+
+import sys
+sys.setrecursionlimit(1000000)
+
+import type
+import term
+
+curline = 0
+
+def reject(err):
+  raise Exception(f'line {curline}: {err}')
+
+# ===== type names
+
+typename2arity = {
+  type.BOOL: 0,
+  type.FUN: 2,
+  type.IND: 0
+}
+
+def typename_add(name,arity):
+  if name in typename2arity: reject(f'type name {name} already used')
+  typename2arity[name] = arity
+
+# ===== constant names
+
+Atype = type.var('A')
+Atype2bool = type.fun(Atype,type.bool)
+constname2type = {
+  '=': type.fun(Atype,Atype2bool),
+  '@': type.fun(Atype2bool,Atype),
+}
+
+def constant_add(name,y):
+  if name in constname2type: reject(f'constant name {name} already used')
+  constname2type[name] = y
+  return term.const(name,y)
+
+def constant_subst(name,y2z):
+  if name not in constname2type: reject(f'constant name {name} undefined')
+  return term.const(name,type.subst(constname2type[name],y2z))
+
+# ===== inferences
+
+def hypotheses_merge(H0,H1):
+  return tuple(term.alphaorder_merge(H0,H1))
+
+def hypotheses_map(f,H):
+  return term.alphaorder_map(f,H)
+
+def AXIOM(t):
+  if term.ty(t) != type.bool: reject('AXIOM: non-bool')
+  return (),t
+
+# t = t
+def REFL(t):
+  return (),term.eq(t,t)
+
+# t entails t
+def ASSUME(t):
+  if term.ty(t) != type.bool: reject('ASSUME: non-bool')
+  return (t,),t
+
+# input: (x|->y)(x)
+# output: (x|->y)(x) = y
+def BETA(t):
+  if not term.is_eval(t): reject('BETA: non-eval')
+  f,x = term.eval_funpoint(t)
+  if not term.is_mapsto(f): reject('BETA: non-mapsto')
+  v,y = term.mapsto_varout(f)
+  if x != v: reject('BETA: variable mismatch')
+  return (),term.eq(t,y)
+
+# input: C0 is A = B; C1 is B = C
+# output: A = C
+def TRANS(H0,C0,H1,C1):
+  if not term.is_eq(C0): reject('TRANS: first conclusion not equality')
+  if not term.is_eq(C1): reject('TRANS: second conclusion not equality')
+  L0,R0 = term.eq_split(C0)
+  L1,R1 = term.eq_split(C1)
+  if not term.alphaequivalent(R0,L1): reject('TRANS: mismatch')
+  return hypotheses_merge(H0,H1),term.eq(L0,R1)
+
+# input: C0 is f = g; C1 is a = b
+# output: f(a) = g(b)
+def MK_COMB(H0,C0,H1,C1):
+  if not term.is_eq(C0): reject('MK_COMB: first conclusion non-equality')
+  if not term.is_eq(C1): reject('MK_COMB: second conclusion non-equality')
+  f,g = term.eq_split(C0)
+  a,b = term.eq_split(C1)
+  if not type.is_fun(term.ty(f)): reject('MK_COMB: first equality is not of functions')
+  y,_ = type.fun_args(term.ty(f))
+  if term.ty(a) != y: reject('MK_COMB: type mismatch')
+  C = term.eq(term.eval(f,a),term.eval(g,b))
+  return hypotheses_merge(H0,H1),C
+
+# input: C0 is L = R; C1 is L
+# output: R
+def EQ_MP(H0,C0,H1,C1):
+  if not term.is_eq(C0): reject('EQ_MP: first conclusion non-equality')
+  L,R = term.eq_split(C0)
+  if not term.alphaequivalent(L,C1): reject('EQ_MP: mismatch')
+  return hypotheses_merge(H0,H1),R
+
+# if q entails p and p entails q then p = q
+def DEDUCT_ANTISYM_RULE(H0,C0,H1,C1):
+  H0 = [h for h in H0 if not term.alphaequivalent(h,C1)]
+  H1 = [h for h in H1 if not term.alphaequivalent(h,C0)]
+  return hypotheses_merge(H0,H1),term.eq(C0,C1)
+
+def ABS(t,H,C):
+  if not term.is_var(t): reject('ABS: non-variable')
+  if not term.is_eq(C): reject('ABS: non-equality')
+  L,R = term.eq_split(C)
+  if any(t in term.freevars(h) for h in H): reject('ABS: variable is free in hypotheses')
+  return H,term.eq(term.mapsto(t,L),term.mapsto(t,R))
+
+def INST(H,C,vwlist):
+  v2w = {}
+  for v,w in vwlist:
+    if not term.is_var(v): reject('INST: non-var')
+    if term.ty(v) != term.ty(w): reject('INST: type mismatch')
+    if v not in v2w: v2w[v] = w
+  H = hypotheses_map((lambda h:term.subst_term(h,v2w)),H)
+  return H,term.subst_term(C,v2w)
+
+def INST_TYPE(H,C,xylist):
+  x2y = {}
+  for x,y in xylist:
+    if not type.is_var(x): reject('INST_TYPE: non-tyvar (HOL Light ignores this)')
+    if x not in x2y: x2y[x] = y
+  H = hypotheses_map((lambda h:term.subst_type(h,x2y)),H)
+  return H,term.subst_type(C,x2y)
+
+def NEW_DEFINITION(t,newname):
+  if not term.is_eq(t): reject('NEW_DEFINITION: non-equality')
+  L,R = term.eq_split(t)
+  if not term.is_var(L): reject('NEW_DEFINITION: non-variable')
+  if term.var_name(L) != newname: reject('NEW_DEFINITION: name mismatch')
+  Ctype = term.ty(L)
+  if not term.is_closed(R): reject('NEW_DEFINITION: free variables')
+  if not set(term.tyvars(R)).issubset(type.vars(Ctype)): reject('NEW_DEFINITION: missing tyvars')
+
+  C = constant_add(newname,Ctype)
+  return (),term.eq(C,R)
+
+def TYPE_DEFINITION(reptype,repterm,H,C,s):
+  s = s.split(']')
+  if len(s) < 5 or s[0] != '' or s[-1] != '': reject('TYPE_DEFINITION: misformatted')
+  abstypename,absname,repname = s[1:4]
+  tyvars = tuple(map(type.var,s[4:-1]))
+
+  if len(H) > 0: reject('TYPE_DEFINITION: hypotheses')
+  if not term.is_eval(C): reject('TYPE_DEFINITION: non-eval')
+  P,x = term.eval_funpoint(C)
+  if repterm != P: reject('TYPE_DEFINITION: repterm mismatch')
+  if reptype != term.ty(x): reject('TYPE_DEFINITION: reptype mismatch')
+  if not term.is_closed(P): reject('TYPE_DEFINITION: free variables')
+  if tyvars != tuple(sorted(set(term.tyvars(P)))): reject('TYPE_DEFINITION: tyvars mismatch')
+
+  typename_add(abstypename,len(tyvars))
+  abstype = type.app(abstypename,*tyvars)
+
+  abs = constant_add(absname,type.fun(reptype,abstype))
+  rep = constant_add(repname,type.fun(abstype,reptype))
+
+  absvar = term.var('a',abstype)
+  repvar = term.var('r',reptype)
+
+  absthm = (),term.eq(term.eval(abs,term.eval(rep,absvar)),absvar)
+  repthm = (),term.eq(term.eval(P,repvar),term.eq(term.eval(rep,term.eval(abs,repvar)),repvar))
+
+  return absthm,repthm
+
+# ===== holtrace parsing
+
+def parse_nonneg(s):
+  result = 0
+  while len(s) > 0:
+    c = s[0]
+    if c == 32:
+      return result,s[1:]
+    if c >= 48 and c <= 57:
+      result = 32*result+c-48
+      s = s[1:]
+      continue
+    if c >= 65 and c <= 86:
+      result = 32*result+c-55
+      s = s[1:]
+      continue
+    break
+  return result,s
+      
+def parse_allowneg(s,id):
+  if s[:1] == b'-':
+    n,s = parse_nonneg(s[1:])
+    return id-n,s
+  return parse_nonneg(s)
+
+symbol2int = {
+  b'!':1,
+  b'@':2,
+  b'#':3,
+  b'$':4,
+  b'%':5,
+  b'^':6,
+  b'&':7,
+  b'*':8,
+  b'(':9,
+  b')':10,
+}
+
+def parse_core(s,id):
+  if len(s) == 0: return 0,s
+  c = s[:1]
+  if c in symbol2int:
+    return id-symbol2int[c],s[1:]
+  return parse_allowneg(s,id)
+
+def parse_subid(s,id):
+  slen = len(s)
+  n,s = parse_core(s,id)
+  if len(s) == slen: reject('missing numeric argument')
+  if n < 0 or (n >= id and id >= 0): reject('numeric argument out of range')
+  return n,s
+
+# ===== main driver
+
+def find_subst(y2z,y,z):
+  if type.is_var(y):
+    if y not in y2z: y2z[y] = z
+    if y2z[y] != z: reject(f'type mismatch')
+    return
+  if type.app_name(y) != type.app_name(z): reject(f'type mismatch')
+  for suby,subz in zip(type.app_args(y),type.app_args(z)):
+    find_subst(y2z,suby,subz)
+
+def mk_const(name,z):
+  if name not in constname2type: reject(f'constant name {name} undefined')
+  y = constname2type[name]
+  y2z = {}
+  find_subst(y2z,y,z)
+  result = constant_subst(name,y2z)
+  assert term.ty(result) == z
+  return result
+  
+inf_term = {
+  b'X':AXIOM,
+  b'B':BETA,
+  b'R':REFL,
+  b'U':ASSUME
+}
+inf_thmthm = {
+  b'E':MK_COMB,
+  b'P':EQ_MP,
+  b'V':TRANS,
+  b'Z':DEDUCT_ANTISYM_RULE
+}
+
+def verify():
+  global curline
+
+  curline = 0
+
+  stats_bytes = 0
+
+  types = []
+  terms = []
+  thms = []
+  infid = 0
+  lastinf = None
+  typedefs = []
+
+  ptid = 0
+  thmnames = set()
+
+  def subtype(s):
+    arg,s = parse_subid(s,len(types))
+    return types[arg],s
+  def subterm(s):
+    arg,s = parse_subid(s,len(terms))
+    return terms[arg],s
+  def subthm(s):
+    arg,s = parse_subid(s,len(thms))
+    return thms[arg],s
+  def subtypedef(s):
+    arg,s = parse_subid(s,len(typedefs))
+    return typedefs[arg],s
+
+  for line in sys.stdin.buffer:
+    if not line.endswith(b'\n'): reject('subsequent partial final line')
+    line = line[:-1]
+    if len(line) < 1: reject('blank line is prohibited')
+    for c in line:
+      if c < 32 or c > 126: reject(f'byte {c} is prohibited')
+
+    stats_bytes += len(line)+1
+    curline += 1
+    if curline == 1:
+      if line != b'HOLTrace 1': reject('not HOLTrace 1')
+      continue
+
+    tag,s = line[:1],line[1:]
+
+    if tag == b'a':
+      if len(s) == 0: reject('missing text')
+      types += [type.var(s.decode())]
+    elif tag == b'b':
+      numargs,s = parse_subid(s,-1)
+      args = ()
+      for loop in range(numargs):
+        arg,s = subtype(s)
+        args += arg,
+      if len(s) == 0: reject('missing text')
+      s = s.decode()
+      if s not in typename2arity: reject('undefined type')
+      if numargs != typename2arity[s]: reject('wrong number of app arguments')
+      types += [type.app(s,*args)]
+    elif tag == b'c':
+      ty,s = subtype(s)
+      if len(s) == 0: reject('missing text')
+      terms += [mk_const(s.decode(),ty)]
+    elif tag == b'd':
+      ty,s = subtype(s)
+      if len(s) == 0: reject('missing text')
+      terms += [term.var(s.decode(),ty)]
+    elif tag == b'e':
+      tt,s = subtype(s)
+      t0,s = subterm(s)
+      t1,s = subterm(s)
+      if len(s) != 0: reject('extra argument')
+      if term.ty(t0) != type.fun(term.ty(t1),tt): reject('wrong type')
+      terms += [term.eval(t0,t1,tt)]
+    elif tag == b'f':
+      tt,s = subtype(s)
+      t0,s = subterm(s)
+      t1,s = subterm(s)
+      if len(s) != 0: reject('extra argument')
+      if not term.is_var(t0): reject('non-variable')
+      if tt != type.fun(term.ty(t0),term.ty(t1)): reject('wrong type')
+      terms += [term.mapsto(t0,t1,tt)]
+    elif tag in inf_term:
+      t0,s = subterm(s)
+      if len(s) != 0: reject('extra argument')
+      lastinf = inf_term[tag](t0)
+      infid += 1
+    elif tag in inf_thmthm:
+      t0,s = subthm(s)
+      t1,s = subthm(s)
+      if len(s) != 0: reject('extra argument')
+      lastinf = inf_thmthm[tag](*t0,*t1)
+      infid += 1
+    elif tag == b'F':
+      t0,s = subterm(s)
+      t1,s = subthm(s)
+      if len(s) != 0: reject('extra argument')
+      lastinf = ABS(t0,*t1)
+      infid += 1
+    elif tag == b'S':
+      t0,s = subthm(s)
+      vwlist = ()
+      while len(s) > 0:
+        v,s = subterm(s)
+        w,s = subterm(s)
+        vwlist += ((v,w),)
+      lastinf = INST(*t0,vwlist)
+      infid += 1
+    elif tag == b'T':
+      t0,s = subthm(s)
+      xylist = ()
+      while len(s) > 0:
+        x,s = subtype(s)
+        y,s = subtype(s)
+        xylist += ((x,y),)
+      lastinf = INST_TYPE(*t0,xylist)
+      infid += 1
+    elif tag == b'C':
+      t0,s = subterm(s)
+      if len(s) == 0: reject('missing text')
+      lastinf = NEW_DEFINITION(t0,s.decode())
+      infid += 1
+    elif tag == b'A':
+      t0,s = subtype(s)
+      t1,s = subterm(s)
+      t2,s = subthm(s)
+      if len(s) == 0: reject('missing text')
+      lastinf,delayedinf = TYPE_DEFINITION(t0,t1,*t2,s.decode())
+      typedefs += [delayedinf]
+      infid += 1
+    elif tag == b'D':
+      t0,s = subtypedef(s)
+      if len(s) != 0: reject('extra argument')
+      lastinf = t0
+      infid += 1
+    elif tag == b't':
+      if lastinf is None: reject('missing inference before theorem')
+      hhhc = ()
+      while len(s) > 0:
+        arg,s = subterm(s)
+        hhhc += arg,
+      if len(hhhc) == 0: reject('missing conclusion')
+      H,C = hhhc[:-1],hhhc[-1]
+      if (H,C) != lastinf: reject('theorem not proven by inference')
+      thms += [(H,C)]
+    elif tag == b'/':
+      # not relevant to logic
+      t0,s = subthm(s)
+      if len(s) == 0: reject('missing text')
+      if s in thmnames: reject('theorem name already used')
+      thmnames.add(s)
+      if len(s) == 0: reject('missing theorem name')
+    elif tag == b';':
+      # not relevant to logic
+      if len(s) != 0: reject('extra argument')
+      ptid += 1
+      pass
+    elif tag == b',':
+      # not relevant to logic
+      _,s = subthm(s)
+      _,s = parse_subid(s,infid)
+      if len(s) > 0: _,s = parse_subid(s,ptid)
+      if len(s) > 0: _,s = parse_subid(s,ptid)
+      if len(s) != 0: reject('extra argument')
+      ptid += 1
+    else:
+      reject(f'unrecognized tag {tag.decode()}')
+
+  if curline == 0:
+    raise Exception(f'empty file')
+
+  stats = f'verified {stats_bytes} bytes, '
+  stats += f'{curline} lines, '
+  stats += f'{len(types)} types, '
+  stats += f'{len(terms)} terms, '
+  stats += f'{infid} infs, '
+  stats += f'{len(thms)} thms, '
+  stats += f'{len(typedefs)} typedefs\n'
+  sys.stderr.write(stats)
+
+verify()

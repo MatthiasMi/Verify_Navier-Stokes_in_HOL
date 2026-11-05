@@ -1,0 +1,1131 @@
+#!/usr/bin/env pypy3
+
+import sys
+import string
+import json
+import re
+
+from ptparse import parse_term
+import type
+import term
+
+const_not = term.const('~',type.fun(type.bool,type.bool))
+const_and = term.const('/\\',type.fun(type.bool,type.fun(type.bool,type.bool)))
+const_iff = term.const('=',type.fun(type.bool,type.fun(type.bool,type.bool)))
+const_implies = term.const('==>',type.fun(type.bool,type.fun(type.bool,type.bool)))
+
+def is_const_named(t,name):
+  if not term.is_const(t): return False
+  return term.const_name(t) == name
+
+# recognize op(a)
+def is_op1(u,op=None):
+  if not term.is_eval(u): return False
+  if op is None: return True
+  v = term.eval_fun(u)
+  if isinstance(op,str):
+    return is_const_named(v,op)
+  return v == op
+
+# recognize bin(a)(b)
+# i.e., eval(eval(bin,a),b)
+def is_op2(t,op=None):
+  if not term.is_eval(t): return False
+  u = term.eval_fun(t)
+  if not term.is_eval(u): return False
+  if op is None: return True
+  v = term.eval_fun(u)
+  if isinstance(op,str):
+    return is_const_named(v,op)
+  return v == op
+    
+def op2_args(t):
+  u = term.eval_fun(t)
+  return term.eval_point(u),term.eval_point(t)
+
+def op2_opargs(t):
+  u = term.eval_fun(t)
+  return term.eval_fun(u),term.eval_point(u),term.eval_point(t)
+
+def is_op3(t,op=None):
+  if not term.is_eval(t): return False
+  u = term.eval_fun(t)
+  if not term.is_eval(u): return False
+  v = term.eval_fun(u)
+  if not term.is_eval(v): return False
+  if op is None: return True
+  w = term.eval_fun(v)
+  if isinstance(op,str):
+    return is_const_named(w,op)
+  return w == op
+
+def op3_args(t):
+  u = term.eval_fun(t)
+  v = term.eval_fun(u)
+  return term.eval_point(v),term.eval_point(u),term.eval_point(t)
+
+
+tyfun_right_precedence = 9
+tyfun_precedence = 10
+typrod_precedence = 20
+tycart_precedence = 30
+tyapp_precedence = 40
+
+quantifiers = {
+  ('!','==>'): r'$we have ${2}$ for each ${0}$ such that ${1}',
+  ('!',): r'$we have ${1}$ for each ${0}',
+  ('?',): r'$we have ${1}$ for some ${0}',
+  ('?!',): r'$we have ${1}$ for a unique ${0}',
+  ('@',): r'$some ${0}$ such that ${1}$ if possible$',
+}
+
+constants_dsl = r'''
+
+::       \textor    \relname{or}
+::       \textand   \relname{and}
+::       \min       \opname{min}
+::       \max       \opname{max}
+sup      \sup       \opname{sup}
+inf      \inf       \opname{inf}
+
+# everyone now assumes \N includes 0, right?
+:num     \N     \mathord{\copypastebackslash\mathbb N}
+:int     \Z     \mathord{\copypastebackslash\mathbb Z}
+:real    \R     \mathord{\copypastebackslash\mathbb R}
+
+# multiple popular notations; prefer clarity over conciseness
+I        \idmap \opname{Id}
+T        \True  \opname{True}
+F        \False \opname{False}
+~        \Not   \opname{Not}
+EMPTY    \{\}
+
+# be verbose rather than trying to hide semantic gaps
+::       \recip   \opname{recip}
+real_inv \recip\subscript{0}
+# how often do people use sgn vs. sign?
+::       \sign    \opname{sign}
+real_sgn \sign\subscript{\R}
+int_sgn  \sign\subscript{\Z}
+::       \gcd     \opname{gcd}
+num_gcd  \gcd\subscript{\N}
+int_gcd  \gcd\subscript{\Z}
+::       \lcm     \opname{lcm}
+num_lcm  \lcm\subscript{\N}
+int_lcm  \lcm\subscript{\Z}
+
+# parenthesized binary operations
+o  (\circ)
+== (\equiv)
+*  (\cdot\subscript{\N})
++  (+\subscript{\N})
+-  (-\subscript0)
+<  (<\subscript{\N})
+>  (>\subscript{\N})
+<= (\le\subscript{\N})
+>= (\ge\subscript{\N})
+
+# these probably slow reader down in any case
+UNIV  \universe \opname{Universe}
+:bool \Bool     \opname{Bool}
+one   \one      \mathord{\underline{0}}
+:1    \One      \mathord{\underline{1}}
+/\    \And      \opname{And}
+\/    \Or       \opname{Or}
+==>   \Implies  \opname{Implies}
+!     \ForAll   \opname{ForAll}
+?     \Exists   \opname{Exists}
+?!    \ExistsUnique \opname{ExistsUnique}
+@     \Some     \opname{Some}
+SUC   \Successor \opname{Successor}
+=     \Equality \opname{Equality}
+::    \BIT      \opname{BIT}
+BIT0  \BIT_0
+BIT1  \BIT_1
+::    \Predecessor \opname{Predecessor}
+PRE   \Predecessor_0
+FST   \First    \ordname{First}
+SND   \Second   \ordname{Second}
+dimindex  \#\subscript{1}
+
+'''
+
+constants = {}
+constants_tex = ''
+for line in constants_dsl.splitlines():
+  line = line.strip()
+  if line.startswith('#'): continue
+  line = line.split()
+  if len(line) < 2: continue
+  if line[0] != '::':
+    constants[line[0]] = line[1]
+  if len(line) > 2:
+    constants_tex += '\\def%s{%s}\n' % (line[1],' '.join(line[2:]))
+
+rewrites_dsl = r'''
+
+0: paren
+
+5: set
+
+10: COND  : $if $#0$ then $#1$ else $#2
+10: INJ   : #0$ maps $#1$ injectively to $#2
+10: SURJ  : #0$ maps $#1$ surjectively to $#2
+10: BIJ   : #0$ maps $#1$ bijectively to $#2
+10: IMAGE : $the image of $#0$ on $#1
+10: ==> bool bool bool: #1$ if $#0
+
+50: outer
+
+100: within_quantifier
+
+200: \/  bool bool bool: #0$ or $#assoc#1
+200: /\  bool bool bool: #0$ and $#assoc#1
+
+300: quantifier
+
+400: ,                 : #0,#assoc#1
+
+500: num_divides num num bool  : #0$ divides $#1 : #0$ does not divide $#1
+500: int_divides int int bool  : #0$ divides $#1 : #0$ does not divide $#1
+500: ==                        : #0\equiv #1\pmod{#braced#2} : #0\not\equiv #1\pmod{#braced#2}
+500: DISJOINT                  : #0$ is disjoint from $#1 : #0$ is not disjoint from $#1
+500: HAS_SIZE                  : #0$ has cardinality $#1 : #0$ does not have cardinality $#1
+500: has_inf                   : #0$ has infimum $#1 : #0$ does not have infimum $#1
+500: has_sup                   : #0$ has supremum $#1 : #0$ does not have supremum $#1
+500: EVEN num bool             : #0$ is even$ : #0$ is not even$
+500: ODD num bool              : #0$ is odd$ : #0$ is not odd$
+500: integer real bool         : #0$ is an integer$ : #0$ is not an integer$
+500: prime num bool            : #0$ is prime$ : #0$ is not prime$
+500: ONE_ONE                   : #0$ is injective$ : #0$ is not injective$
+500: ONTO                      : #0$ is surjective$ : #0$ is not surjective$
+500: FINITE                    : #0$ is finite$ : #0$ is not finite$
+500: INFINITE                  : #0$ is infinite$ : #0$ is not infinite$
+500: SING                      : #0$ is a singleton$ : #0$ is not a singleton$
+500: WF                        : #0$ is well-founded$ : #0$ is not well-founded$
+500: COUNTABLE                 : #0$ is countable$ : #0$ is not countable$
+500: <=_c                      : #0$ has cardinality at most that of $#1
+500: >=_c                      : #0$ has cardinality at least that of $#1
+500: <_c                       : #0$ has cardinality strictly below that of $#1
+500: >_c                       : #0$ has cardinality strictly above that of $#1
+500: =_c                       : #0$ has cardinality equal to that of $#1
+500: nsum                      : $the sum over $#0$ of $#1
+500: isum                      : $the sum over $#0$ of $#1
+500: sum                       : $the sum over $#0$ of $#1
+
+599: mapsto_right
+600: mapsto
+
+750: =   bool bool bool      : #0\Leftrightarrow #1 : #0\centernot\Leftrightarrow #1
+
+800: =                       : #0=#1 : #0\ne #1
+800: <   num num bool        : #0<#1 : #0\not<#1
+800: <=  num num bool        : #0\le #1 : #0\not\le #1
+800: >   num num bool        : #0>#1 : #0\not>#1
+800: >=  num num bool        : #0\ge #1 : #0\not\ge #1
+800: real_lt real real bool  : #0<#1 : #0\not<#1
+800: real_le real real bool  : #0\le #1 : #0\not\le #1
+800: real_gt real real bool  : #0>#1 : #0\not>#1
+800: real_ge real real bool  : #0\ge #1 : #0\not\ge #1
+800: int_lt int int bool     : #0<#1 : #0\not<#1
+800: int_le int int bool     : #0\le #1 : #0\not\le #1
+800: int_gt int int bool     : #0>#1 : #0\not>#1
+800: int_ge int int bool     : #0\ge #1 : #0\not\ge #1
+800: IN                      : #0\in #1 : #0\notin #1
+800: SUBSET                  : #0\subseteq #1 : #0\not\subseteq #1
+800: PSUBSET                 : #0\subset #1 : #0\not\subset #1
+
+900: INSERT                  : #1\cup\{#enclosed#0\}
+900: UNION                   : #0\cup #assoc#1
+900: INTER                   : #0\cap #assoc#1
+900: CROSS                   : #0\times #assoc#1
+900: DIFF                    : #0\setminus #1
+900: DELETE                  : #0\setminus\{#enclosed#1\}
+900: UNIONS                  : \bigcup #0
+900: INTERS                  : \bigcap #0
+# more traditional, but too much gets crammed into subscripts:
+# 900: UNIONS                  : \bigcup_{\alpha\in #braced#commaenclosed#0}\alpha
+# 900: INTERS                  : \bigcap_{\alpha\in #braced#commaenclosed#0}\alpha
+
+2000: o                        : #0\circ #assoc#1
+2000: MOD num num num          : #0\bmod #1
+2000: +   num num num          : #0+#assoc#1
+2000: real_add real real real  : #0+#assoc#1
+2000: int_add int int int      : #0+#assoc#1
+2000: -   num num num          : #0\mathbin{-\subscript{0}}#1
+2000: real_sub real real real  : #0-#1
+2000: int_sub int int int      : #0-#1
+2000: real_neg real real       : -#0
+2000: int_neg int int          : -#0
+
+3000: *   num num num          : #0\cdot #assoc#1
+3000: real_mul real real real  : #0\cdot #assoc#1
+3000: int_mul int int int      : #0\cdot #assoc#1
+3000: real_div real real real  : #0\mathbin{/\!\subscript{0}}#1
+
+3500: DIV num num num         : {\lfloor #0\mathbin{/\!\subscript{0}} #1\rfloor}
+3500: MAX num num num         : {\max\lbrace #commaenclosed#0,#commaenclosed#1\rbrace}
+3500: real_max real real real : {\max\lbrace #commaenclosed#0,#commaenclosed#1\rbrace}
+3500: int_max int int int     : {\max\lbrace #commaenclosed#0,#commaenclosed#1\rbrace}
+3500: MIN num num num         : {\min\lbrace #commaenclosed#0,#commaenclosed#1\rbrace}
+3500: real_min real real real : {\min\lbrace #commaenclosed#0,#commaenclosed#1\rbrace}
+3500: int_min int int int     : {\min\lbrace #commaenclosed#0,#commaenclosed#1\rbrace}
+3500: num_gcd num,num num     : {\gcd(#enclosed#0)}
+3500: int_gcd int,int int     : {\gcd(#enclosed#0)}
+3500: num_lcm num,num num     : {\lcm(#enclosed#0)}
+3500: int_lcm int,int int     : {\lcm(#enclosed#0)}
+3500: real_sgn real real      : {\sign(#enclosed#0)}
+3500: int_sgn int int         : {\sign(#enclosed#0)}
+
+9999: f
+10000: f(x)
+
+20000: FACT num num            : #0!
+20000: EXP num num num         : #0\superscript{#braced#enclosed#1}
+20000: real_pow real num real  : #0\superscript{#braced#enclosed#1}
+20000: real_zpow real int real : #0\superscript{#braced#enclosed#1}
+20000: int_pow int num int     : #0\superscript{#braced#enclosed#1}
+20000: CARD                    : \###0
+20000: real_of_num num real    : #0\subscript{\R}
+20000: real_of_int int real    : #0\subscript{\R}
+20000: int_of_num num int      : #0\subscript{\Z}
+20000: int_of_real real int    : #0\subscript{\Z}
+20000: num_of_int int num      : #0\subscript{\N}
+
+30000: real_abs real real  : \mathord{|{#braced#enclosed#0}|}
+30000: int_abs int int     : \mathord{|{#braced#enclosed#0}|}
+30000: sqrt real real      : \sqrt{#braced#enclosed#0}
+30000: .. num num num bool : \{#commaenclosed#0,\dots,#commaenclosed#1\}
+
+'''
+
+def commatype(u):
+  if ',' not in u: return type.app(u)
+  s = u.split(',')
+  return type.app('prod',type.app(s[0]),commatype(','.join(s[1:])))
+
+precedence_tags = set((
+  'paren','outer','set',
+  'quantifier','within_quantifier',
+  'mapsto','mapsto_right',
+  'f(x)','f'
+))
+precedence_table = {}
+
+def rewrites_parse():
+  global rewrites
+
+  rewrites = {}
+
+  for line in rewrites_dsl.splitlines():
+    line = line.strip()
+    if line.startswith('#'): continue
+    line = line.split(':')
+    if len(line) < 3:
+      if len(line) == 2:
+        key = line[1].strip()
+        assert key in precedence_tags
+        precedence_table[key] = int(line[0].strip())
+      continue
+    precedence = int(line[0].strip())
+    holop = line[1].split()
+    op = holop[0]
+    if len(holop) == 1:
+      key = op,
+    else:
+      ty = type.app(holop[-1])
+      for u in reversed(holop[1:-1]):
+        u = commatype(u)
+        ty = type.fun(u,ty)
+      key = op,ty
+    for pos in 2,3:
+      if pos >= len(line): continue
+      tex = line[pos].strip()
+      tex = tex.replace('{','{{')
+      tex = tex.replace('}','}}')
+      subprecedence = {}
+      numparams = 0
+      assoc = set()
+      braced = set()
+      for param in 0,1,2:
+        # reverse alphabetical
+        if f'#enclosed#{param}' in tex:
+          subprecedence[param] = 0
+          tex = tex.replace(f'#enclosed#{param}',f'#{param}')
+        if f'#commaenclosed#{param}' in tex:
+          subprecedence[param] = 400
+          tex = tex.replace(f'#commaenclosed#{param}',f'#{param}')
+        if f'#braced#{param}' in tex:
+          braced.add(param)
+          tex = tex.replace(f'#braced#{param}',f'#{param}')
+        if f'#assoc#{param}' in tex:
+          assoc.add(param)
+          tex = tex.replace(f'#assoc#{param}',f'#{param}')
+        if f'#{param}' in tex:
+          numparams = param+1
+          tex = tex.replace(f'#{param}',f'{{{param}}}')
+      tex = tex.replace('##','#')
+      assert numparams in (1,2,3)
+      for param in range(numparams):
+        if param not in subprecedence:
+          subprecedence[param] = precedence
+      if pos == 2: rewrites[numparams,key] = tex,precedence,subprecedence,assoc,braced
+      if pos == 3: rewrites[-numparams,key] = tex,precedence,subprecedence,assoc,braced
+
+rewrites_parse()
+paren_precedence = precedence_table['paren']
+
+BIT0 = term.const('BIT0',type.fun(type.num,type.num))
+BIT1 = term.const('BIT1',type.fun(type.num,type.num))
+
+def int_from_numeral(t):
+  if is_op1(t,BIT0): return int_from_numeral(term.eval_point(t))*2
+  if is_op1(t,BIT1): return int_from_numeral(term.eval_point(t))*2+1
+  if t == term.const('_0',type.num): return 0
+  raise Exception(f'unknown numeral: {t}')
+
+def format_tt(name):
+  name = ''.join(c for c in name if c.isprintable()) # XXX: do something invertible?
+  name = name.replace('\\',"\1\\char'134\2")
+  name = name.replace(' ',"\1\\char'020\2")
+  name = name.replace('#',"\1\\char'043\2")
+  name = name.replace('$',"\1\\char'044\2")
+  name = name.replace('%',"\1\\char'045\2")
+  name = name.replace('&',"\1\\char'046\2")
+  name = name.replace('<',"\1\\char'074\2")
+  name = name.replace('=',"\1\\char'075\2")
+  name = name.replace('>',"\1\\char'076\2")
+  name = name.replace('^',"\1\\char'136\2")
+  name = name.replace('_',"\1\\char'137\2")
+  name = name.replace('{',"\1\\char'173\2")
+  name = name.replace('|',"\1\\char'174\2")
+  name = name.replace('}',"\1\\char'175\2")
+  name = name.replace('~',"\1\\char'176\2")
+  name = name.replace('\1','{')
+  name = name.replace('\2','}')
+  return r'\ordname{\text{\tt %s}}' % name
+
+# XXX: also use this to handle floor etc.
+parenthesize_left = '(','['
+parenthesize_right = ')',']'
+parenthesize_sizes = '',r'\bigl',r'\Bigl',r'\biggl',r'\Biggl'
+
+def parenthesize(s,left='(',right=')'):
+  assert left in parenthesize_left
+  assert right in parenthesize_right
+
+  for pos,size in reversed(list(enumerate(parenthesize_sizes))):
+    if pos > 0:
+      prevsize = parenthesize_sizes[pos-1]
+      if sum(s.count(prevsize+x) for x in parenthesize_left) < 2:
+        continue
+    return size+left+s+size.replace('l','r')+right
+
+def format_name(name):
+  # XXX: deal with other weird characters in names
+  if len(name) == 0:
+    return 'TODO(emptyname)'
+  m = re.fullmatch("([a-zA-Z])([0-9]*)('*)",name)
+  if m:
+    v = m.group(1)
+    if v == 'l': v = '{\\ell}'
+    if len(m.group(2)) > 0:
+      # ok to copy and paste without subscript
+      return v+'_{'+m.group(2)+'}'+m.group(3)
+    return v+m.group(3)
+  return format_tt(name)
+
+def format_type(ty,precedence=paren_precedence):
+  def maybeparen(s,newprecedence):
+    return parenthesize(s) if precedence >= newprecedence else s
+
+  if type.is_var(ty):
+    return format_name(type.var_name(ty))
+
+  tyname = type.app_name(ty)
+  tyargs = type.app_args(ty)
+  if tyname == 'fun':
+    assert len(tyargs) == 2
+    s0 = format_type(tyargs[0],precedence=tyfun_precedence)
+    s1 = format_type(tyargs[1],precedence=tyfun_right_precedence)
+    return maybeparen(fr'{s0}\rightarrow {s1}',tyfun_precedence)
+  if tyname == 'prod':
+    assert len(tyargs) == 2
+    s0 = format_type(tyargs[0],precedence=typrod_precedence)
+    s1 = format_type(tyargs[1],precedence=typrod_precedence)
+    return maybeparen(fr'{s0}\times {s1}',typrod_precedence)
+  if tyname == 'cart':
+    assert len(tyargs) == 2
+    s0 = format_type(tyargs[0],precedence=tycart_precedence)
+    s1 = format_type(tyargs[1],precedence=paren_precedence)
+    return maybeparen(fr'{s0}\superscript{{\#_1({s1})}}',tycart_precedence)
+
+  if ':'+tyname in constants:
+    result = constants[':'+tyname]+' '
+  else:
+    result = format_name(tyname)
+  for u in tyargs:
+    result += parenthesize(format_type(u))
+  return maybeparen(result,tyapp_precedence)
+
+def format_intype(ty):
+  result = format_type(ty)
+  if type.is_fun(ty): return ':'+result
+  return r'\in '+result
+
+def format_universe(t,precedence):
+  def maybeparen(s,newprecedence):
+    return parenthesize(s) if precedence >= newprecedence else s
+
+  assert term.const_name(t) == 'UNIV'
+  y = term.ty(t)
+  if type.is_fun(y):
+    left,right = type.fun_args(y)
+    if right == type.bool:
+      result = format_type(left)
+      if type.is_var(left) or len(type.app_args(left)) == 0: # XXX
+        return result
+      return maybeparen(format_type(left),paren_precedence)
+
+  result = constants['UNIV']
+  result += format_intype(y)
+  return maybeparen(result,paren_precedence)
+
+# match `(x,(y,z))` against (x,y,z)
+def is_commalist(t,vars):
+  assert len(vars) > 0
+  if len(vars) == 1: return t == vars[0]
+  if is_op2(t,','):
+    left,right = op2_args(t)
+    if left == vars[0]:
+      return is_commalist(right,vars[1:])
+  return False
+
+def format_varlist(V,sides=None):
+  result = ''
+  justdidtype = False
+  for vpos,v in enumerate(V):
+    if vpos > 0:
+      result += r'$\textcomma $' if justdidtype else ','
+    result += format_math(v,precedence_table['quantifier'],sides=sides)
+    justdidtype = False
+    if vpos == len(V)-1 or term.ty(v) != term.ty(V[vpos+1]):
+      result += format_intype(term.ty(v))
+      justdidtype = True
+  return result
+
+def format_varlistlist(V,sides=None):
+  result = ''
+  justdidtype = False
+  for vpos,v in enumerate(V):
+    if vpos > 0:
+      result += r'$\textcomma $' if justdidtype else ','
+    justdidtype = False
+    if len(v) > 1:
+      result += '('+format_varlist(v,sides=sides)+')'
+    else:
+      result += format_math(v[0],precedence_table['quantifier'],sides=sides)
+      if vpos == len(V)-1 or len(V[vpos+1]) != 1 or term.ty(v[0]) != term.ty(V[vpos+1][0]):
+        result += format_intype(term.ty(v[0]))
+        justdidtype = True
+  return result
+
+# converts `a|->z` into (a,),z,
+# converts `a,b|->z` into (a,b),z
+# etc.
+# and returns None if input is not mapsto
+def recognize_mapsto(t):
+  if term.is_mapsto(t):
+    # built-in var|->out
+    var,out = term.mapsto_varout(t)
+    assert term.is_var(var)
+    return (var,),out
+
+  # generalized (a,b)|->z
+  # is represented as some f where all a,b have f(a,b) = z
+  # hol light writes (some,=) as (GABS,GEQ) to support this type of printing
+
+  if not is_op1(t,'GABS'): return
+  t = term.eval_point(t)
+  if not term.is_mapsto(t): return
+
+  f,u = term.mapsto_varout(t)
+  assert term.is_var(f)
+  vars = []
+  while is_op1(u,'!') and term.is_mapsto(term.eval_point(u)):
+    v,u = term.mapsto_varout(term.eval_point(u))
+    assert term.is_var(v)
+    vars += [v]
+  if len(vars) > 0 and is_op2(u,'GEQ'):
+    fabc,right = op2_args(u)
+    if is_op1(fabc,f):
+      if is_commalist(term.eval_point(fabc),vars):
+        return vars,right
+
+# return (x,y),f(x,y),p(x,y) for {f(x,y):x,y satisfy p(x,y)}
+def recognize_set(t):
+  # { f(x,y) : x,y satisfy p(x,y) }
+  # is represented as: z |-> exists x,y with p(x,y) and z = f(x,y)
+  # hol light says: GSPEC(z |-> exists x,y with SETSPEC(z,p(x,y),f(x,y)))
+  if not is_op1(t,'GSPEC'): return
+  t = term.eval_point(t)
+  if not term.is_mapsto(t): return
+  z,t = term.mapsto_varout(t)
+  assert term.is_var(z)
+
+  xlist = []
+  while is_op1(t,'?') and term.is_mapsto(term.eval_point(t)):
+    x,t = term.mapsto_varout(term.eval_point(t))
+    assert term.is_var(x)
+    xlist += [x]
+
+  if len(xlist) > 0 and is_op3(t,'SETSPEC'):
+    zcheck,p,f = op3_args(t)
+    if zcheck == z: return tuple(xlist),f,p
+
+def embrace(s):
+  return r'\text{$'+s+'$}' if '$' in s else s
+
+def term_is_bool(t):
+  return term.ty(t) == type.bool
+
+def format_math(t,precedence=None,parensetting=None,needqparen=False,sides=None):
+  if precedence is None:
+    precedence = precedence_table['outer']
+  def maybeparen(s,newprecedence):
+    if precedence < newprecedence:
+      if not (needqparen and newprecedence == precedence_table['quantifier']):
+        return s
+    return parenthesize(s,'[',']') if term_is_bool(t) else parenthesize(s)
+
+  M = recognize_mapsto(t)
+  if M is not None:
+    vars,output = M
+    result = format_varlist(vars,sides=sides)
+    if len(vars) > 1: result = '('+result+')'
+    result += r'\mapsto '
+    result += format_math(output,precedence_table['mapsto_right'],sides=sides)
+    return maybeparen(result,precedence_table['mapsto'])
+
+  if term.is_eval(t):
+    S = recognize_set(t)
+    if S is not None:
+      subprecedence = precedence_table['set']
+      xlist,f,p = S
+      result = r'\{'
+      if len(xlist) == 1 and f == xlist[0]:
+        result += format_math(xlist[0],subprecedence,sides=sides)
+        result += format_intype(term.ty(xlist[0]))
+        result += '\mid '
+      else:
+        result += format_math(f,subprecedence,sides=sides)
+        result += '\mid '
+        result += format_varlist(xlist,sides=sides)
+        if len(xlist) == 1:
+          result += '$ satisfies $'
+        else:
+          result += '$ satisfy $'
+      result += format_math(p,subprecedence,sides=sides)
+      result += r'\}'
+      return result
+
+    F1,P1 = term.eval_funpoint(t) # term is F1(P1)
+
+    for polymorphic in False,True: # False first for, e.g., <=> vs. =
+      def fun2key(F):
+        if not term.is_const(F): return None
+        if polymorphic: return term.const_name(F),
+        return term.const_name(F),term.ty(F)
+
+      key = 1,fun2key(F1)
+      if key in rewrites: # unary operation
+        tex,newprecedence,subprecedence,assoc,braced = rewrites[key]
+        arg0 = format_math(P1,subprecedence[0],needqparen=needqparen,sides=sides)
+        if 0 in braced: arg0 = embrace(arg0)
+        return maybeparen(tex.format(arg0),newprecedence)
+
+      if term.is_eval(F1):
+        F2,P2 = term.eval_funpoint(F1) # term is F2(P2)(P1)
+        key = 2,fun2key(F2)
+        if key in rewrites: # binary operation
+          tex,newprecedence,subprecedence,assoc,braced = rewrites[key]
+          subparensetting = None
+          # the sides test: if expression uses (a+b)+c, also keep parens in a+(b+c)
+          if 1 in assoc and (key[1],0) not in sides:
+            subparensetting = key[1]
+          arg0 = format_math(P2,subprecedence[0],needqparen=needqparen,sides=sides)
+          if 0 in braced: arg0 = embrace(arg0)
+          arg1 = format_math(P1,subprecedence[1],parensetting=subparensetting,needqparen=needqparen,sides=sides)
+          if 1 in braced: arg1 = embrace(arg1)
+          result = tex.format(arg0,arg1)
+          if parensetting == key[1]: return result
+          return maybeparen(result,newprecedence)
+
+        if term.is_eval(F2):
+          F3,P3 = term.eval_funpoint(F2) # term is F3(P3)(P2)(P1)
+          key = 3,fun2key(F3)
+          if key in rewrites: # ternary operation
+            tex,newprecedence,subprecedence,assoc,braced = rewrites[key]
+            arg0 = format_math(P3,subprecedence[0],needqparen=needqparen,sides=sides)
+            if 0 in braced: arg0 = embrace(arg0)
+            arg1 = format_math(P2,subprecedence[1],needqparen=needqparen,sides=sides)
+            if 1 in braced: arg1 = embrace(arg1)
+            arg2 = format_math(P1,subprecedence[2],needqparen=needqparen,sides=sides)
+            if 2 in braced: arg2 = embrace(arg2)
+            return maybeparen(tex.format(arg0,arg1,arg2),newprecedence)
+
+      if F1 == const_not:
+        if term.is_eval(P1):
+          F2,P2 = term.eval_funpoint(P1) # term is ~(F2(P2))
+          key = -1,fun2key(F2)
+          if key in rewrites: # negated unary operation
+            tex,newprecedence,subprecedence,assoc,braced = rewrites[key]
+            arg0 = format_math(P2,subprecedence[0],needqparen=needqparen,sides=sides)
+            if 0 in braced: arg0 = embrace(arg0)
+            return maybeparen(tex.format(arg0),newprecedence)
+
+          if term.is_eval(F2):
+            F3,P3 = term.eval_funpoint(F2) # term is ~(F3(P3)(P2))
+            key = -2,fun2key(F3)
+            if key in rewrites: # negated binary operation
+              tex,newprecedence,subprecedence,assoc,braced = rewrites[key]
+              arg0 = format_math(P3,subprecedence[0],needqparen=needqparen,sides=sides)
+              if 0 in braced: arg0 = embrace(arg0)
+              arg1 = format_math(P2,subprecedence[1],needqparen=needqparen,sides=sides)
+              if 1 in braced: arg1 = embrace(arg1)
+              return maybeparen(tex.format(arg0,arg1),newprecedence)
+
+    # quantifiers
+    if term.is_const(F1) and (term.const_name(F1),) in quantifiers:
+      key = term.const_name(F1),
+      u = t
+      V = []
+      while term.is_eval(u):
+        F = term.eval_fun(u)
+        if not term.is_const(F): break
+        if (term.const_name(F),) != key: break
+        M = recognize_mapsto(term.eval_point(u))
+        if M is None: break
+        vars,u = M
+        V += [vars]
+      if len(V) > 0:
+        subprecedence = precedence_table['within_quantifier']
+
+        if needqparen or precedence <= precedence_table['outer']: # avoid ambiguity
+          if key == ('!',):
+            if is_op2(u,const_implies):
+              left,right = op2_args(u)
+              fmt = quantifiers['!','==>']
+              arg0 = format_varlistlist(V,sides=sides)
+              arg1 = format_math(left,subprecedence,needqparen=True,sides=sides)
+              arg2 = format_math(right,subprecedence,needqparen=True,sides=sides)
+              return maybeparen(fmt.format(arg0,arg1,arg2),precedence_table['quantifier'])
+
+        fmt = quantifiers[key]
+        arg0 = format_varlistlist(V,sides=sides)
+        arg1 = format_math(u,subprecedence,needqparen=True,sides=sides)
+        return maybeparen(fmt.format(arg0,arg1),precedence_table['quantifier'])
+
+    # numerals
+    if is_const_named(F1,'NUMERAL'):
+      try:
+        return str(int_from_numeral(P1))
+      except:
+        pass
+
+    # backup: f(x)
+    fun = format_math(F1,precedence_table['f'],sides=sides)
+    arg = parenthesize(format_math(P1,paren_precedence,sides=sides))
+    return maybeparen(fr'{fun}{arg}',precedence_table['f(x)'])
+
+  if term.is_var(t):
+    return format_name(term.var_name(t))
+
+  assert term.is_const(t)
+  tname = term.const_name(t)
+  if tname == 'UNIV': return format_universe(t,precedence)
+  if tname == 'I':
+    result = constants['I']
+    result += format_intype(term.ty(t))
+    return maybeparen(result,paren_precedence)
+  if tname in constants:
+    return constants[tname]
+    # XXX: does this ever need space after?
+  return format_tt(tname)
+
+def format_text(t,layer=0,needthen=True,sides=None):
+  if layer < 1:
+    assumptions = []
+    def add(assumptions,u):
+      if is_op2(u,const_and):
+        left,right = op2_args(u)
+        add(assumptions,left)
+        add(assumptions,right)
+      else:
+        assumptions += [u]
+    while is_op2(t,const_implies):
+      left,right = op2_args(t)
+      add(assumptions,left)
+      t = right
+    if assumptions != []:
+      result = ''
+      for apos,a in enumerate(assumptions):
+        result += 'Assume '
+        subresult = format_text(a,layer=1,needthen=False,sides=sides)
+        if term.is_eval(a):
+          ef = term.eval_fun(a)
+          if term.is_const(ef) and (term.const_name(ef),) in quantifiers:
+            if subresult.startswith('$$we have '):
+              subresult = subresult[10:]
+            elif subresult.startswith('$$some '):
+              subresult = subresult[7:]
+        result += subresult
+        result += '.\n'
+      result += format_text(t,layer=1,needthen=needthen,sides=sides)
+      return result
+
+  if layer < 2 and is_op2(t,const_and):
+    left,right = op2_args(t)
+    arg0 = format_text(left,layer=layer,needthen=needthen,sides=sides)
+    arg1 = format_text(right,layer=layer,needthen=False,sides=sides)
+    return f'{arg0}. Also {arg1}'
+
+  if layer < 3 and is_op2(t,const_iff):
+    left,right = op2_args(t)
+    arg0 = format_text(left,layer=3,needthen=False,sides=sides)
+    arg1 = format_text(right,layer=3,needthen=False,sides=sides)
+    result = f'{arg0} if and only if {arg1}'
+    if needthen: result = r'Then '+result
+    return result
+
+  result = '$'+format_math(t,sides=sides)+'$'
+  if needthen: result = r'Then '+result
+  return result
+
+def type_rename_tyvars(ty,rename):
+  if type.is_app(ty):
+    return type.app(type.app_name(ty),*(type_rename_tyvars(x,rename) for x in type.app_args(ty)))
+  tyname = type.var_name(ty)
+  if tyname in rename:
+    ty = type.var(rename[tyname])
+  return ty
+
+def term_rename_tyvars(t,rename):
+  if term.is_const(t):
+    return term.const(term.const_name(t),type_rename_tyvars(term.ty(t),rename))
+  if term.is_var(t):
+    return term.var(term.var_name(t),type_rename_tyvars(term.ty(t),rename))
+  if term.is_eval(t):
+    f,p = term.eval_funpoint(t)
+    return term.eval(term_rename_tyvars(f,rename),term_rename_tyvars(p,rename))
+  v,t = term.mapsto_varout(t)
+  return term.mapsto(term_rename_tyvars(v,rename),term_rename_tyvars(t,rename))
+
+def cleanup_tyvars(t):
+  def newnames():
+    primes = 0
+    while True:
+      for c in 'ZY': yield c+"'"*primes
+      primes += 1
+  newnames = newnames()
+
+  V = set(term.tyvars(t))
+
+  rename = {}
+  for v in sorted(V):
+    vname = type.var_name(v)
+    if len(vname) != 1 or vname not in string.ascii_letters:
+      for newname in newnames:
+        if type.var(newname) not in V:
+          rename[vname] = newname
+          break
+
+  if len(rename) == 0: return t
+  return term_rename_tyvars(t,rename)
+
+def vars(t):
+  if term.is_var(t): yield t
+  if term.is_eval(t):
+    for u in vars(term.eval_fun(t)): yield u
+    for u in vars(term.eval_point(t)): yield u
+  if term.is_mapsto(t):
+    for u in vars(term.mapsto_var(t)): yield u
+    for u in vars(term.mapsto_out(t)): yield u
+
+def typekey(y):
+  if type.is_var(y): return 1,type.var_name(y)
+  return (0,type.app_name(y))+tuple(typekey(z) for z in type.app_args(y))
+
+def format_freevars(t):
+  result = ''
+  type2names = {}
+  for v in term.freevars(t):
+    n = term.var_name(v)
+    ty = term.ty(v)
+    if ty not in type2names:
+      type2names[ty] = set()
+    type2names[ty].add(n)
+
+  for ty in sorted(type2names,key=typekey):
+    names = [format_name(n) for n in sorted(type2names[ty])]
+    names = ','.join(names)
+    utype = format_intype(ty)
+    result += f'Fix ${names}{utype}$.\n' 
+
+  return result
+
+def rename_vars(t,rename):
+  if term.is_const(t): return t
+  if term.is_eval(t):
+    f,p = term.eval_funpoint(t)
+    return term.eval(rename_vars(f,rename),rename_vars(p,rename))
+  if term.is_mapsto(t):
+    v,t = term.mapsto_varout(t)
+    return term.mapsto(rename_vars(v,rename),rename_vars(t,rename))
+  ty = term.ty(t)
+  key = term.var_name(t),ty
+  if key in rename:
+    return term.var(rename[key],ty)
+  return t
+
+# rename variables (free or bound) if necessary
+# to avoid collisions on first components
+# and to avoid multi-letter variable names
+def cleanup_vars(t):
+  n2ty = {}
+  rename = {}
+
+  # give freevars first shot at names
+  todo = list(term.freevars(t))+list(vars(t))
+
+  for v in todo:
+    n2ty[term.var_name(v)] = term.ty(v)
+
+  def newnames():
+    primes = 0
+    while True:
+      for c in 'zy': yield c+"'"*primes
+      primes += 1
+
+  newnames = newnames()
+  for v in todo:
+    n = term.var_name(v)
+    ty = term.ty(v)
+    if ty == n2ty[n] and re.fullmatch("([a-zA-Z])([0-9]*)('*)",n): continue
+    if (n,ty) in rename: continue
+    for newname in newnames:
+      if newname not in n2ty:
+        rename[n,ty] = newname
+        break
+
+  if len(rename) == 0: return t
+  return rename_vars(t,rename)
+
+# (a+b)+c yields (('+',...),0)
+# a+(b+c) yields (('+',...),1)
+# XXX: maybe also have this call type_sides for AxBxC
+def term_sides(t):
+  if term.is_eval(t):
+    yield from term_sides(term.eval_fun(t))
+    yield from term_sides(term.eval_point(t))
+  if term.is_mapsto(t):
+    # var might be useful later if this calls type_sides
+    yield from term_sides(term.mapsto_var(t))
+    yield from term_sides(term.mapsto_out(t))
+
+  if not is_op2(t): return
+  op,left,right = op2_opargs(t)
+  if not term.is_const(op): return
+  opname = term.const_name(op)
+
+  if is_op2(right,op): yield (opname,term.ty(op)),1 # op(x,op(y,z))
+  if is_op2(left,op): yield (opname,term.ty(op)),0 # op(op(x,y),z)
+
+  # and now the polymorphic versions for, e.g., a,b,c
+  if is_op2(right,opname): yield (opname,),1
+  if is_op2(left,opname): yield (opname,),0
+
+def format_theorem(thm,name,typedefnames=None):
+  if name == ' axiom':
+    label = 'axiom'
+  elif name == ' definition':
+    label = 'definition'
+  elif name == ' typedef':
+    label = 'typedef'
+  else:
+    label = 'theorem'
+    for c in name: assert c in string.ascii_letters+string.digits+"_.'"
+    quotename = name.replace('_','\\_')
+
+  todo = [thm]
+  tryrewrite = True
+  while tryrewrite:
+    tryrewrite = False
+    newtodo = []
+    for t in todo:
+      # split outer conjunction into multiple theorems
+      if is_op2(t,const_and):
+        left,right = op2_args(t)
+        newtodo += [left,right]
+        tryrewrite = True
+        continue
+      # remove outer forall layer
+      if is_op1(t,'!'):
+        point = term.eval_point(t)
+        if term.is_mapsto(point):
+          newtodo += [term.mapsto_out(point)]
+          tryrewrite = True
+          continue
+      newtodo += [t]
+    todo = newtodo
+
+  result = ''
+  for tpos,t in enumerate(todo):
+    result += r'\begin{%s}' % label
+    if label == 'theorem':
+      if len(todo) == 1:
+        result += r'[\tt %s]' % quotename
+      else:
+        result += r'[{\tt %s}, part %d]' % (quotename,1+tpos)
+    else:
+      if len(todo) > 1:
+        result += r'[part %d]' % (1+tpos)
+    result += r'\sl\ignorespaces'
+    result += '\n'
+
+    t = cleanup_tyvars(t)
+
+    if label == 'definition':
+      left,right = term.eq_split(t)
+      dname = term.var_name(left)
+      innerresult = 'Define $'
+      if dname in constants:
+        innerresult += constants[dname]
+      else:
+        innerresult += format_tt(dname)
+      innerresult += format_intype(term.ty(left))
+      innerresult += '$ as $'
+      right = cleanup_vars(right)
+      sides = set(term_sides(right))
+      innerresult += format_math(right,precedence_table['quantifier'],sides=sides)
+      innerresult += '$'
+    elif label == 'typedef':
+      t = cleanup_vars(t)
+      funtype = term.ty(t)
+      sides = set(term_sides(t))
+      reptype,_ = type.fun_args(funtype)
+      abstypename,absname,repname = typedefnames[:3]
+      tyvarnames = typedefnames[3:]
+      tyvars = tuple(map(type.var,tyvarnames))
+      abstype = type.app(abstypename,*tyvars)
+      absfun = term.const(absname,type.fun(reptype,abstype))
+      repfun = term.const(repname,type.fun(abstype,reptype))
+      absvar = term.var('a',abstype)
+      repvar = term.var('r',reptype)
+      athm = term.eq(term.eval(absfun,term.eval(repfun,absvar)),absvar)
+      rthm = term.eq(term.eval(t,repvar),term.eq(term.eval(repfun,term.eval(absfun,repvar)),repvar))
+      innerresult = 'Define a type $'
+      innerresult += format_type(abstype)
+      innerresult += '$, a function $'
+      innerresult += constants[absname] if absname in constants else format_tt(absname)
+      innerresult += format_intype(type.fun(reptype,abstype))
+      innerresult += '$, and a function $'
+      innerresult += constants[repname] if repname in constants else format_tt(repname)
+      innerresult += format_intype(type.fun(abstype,reptype))
+      innerresult += '$ such that each $a'
+      innerresult += format_intype(abstype)
+      innerresult += '$ has $'
+      innerresult += format_math(athm,precedence_table['quantifier'],sides=sides)
+      innerresult += '$ and each $r'
+      innerresult += format_intype(reptype)
+      innerresult += '$ has $'
+      innerresult += format_math(rthm,precedence_table['quantifier'],sides=sides)
+      innerresult += '$'
+    else:
+      t = cleanup_vars(t)
+      sides = set(term_sides(t))
+      innerresult = format_freevars(t)
+      innerresult += format_text(t,sides=sides)
+
+    innerresult = innerresult.replace('$$','')
+    if innerresult.startswith(r'Then '):
+      innerresult = innerresult[5:]
+    if innerresult.startswith('we '):
+      innerresult = 'W'+innerresult[1:]
+
+    result += innerresult
+    result += '.\n'
+    result += r'\end{%s}' % label
+    result += '\n'
+  return result
+
+print(r'''\documentclass{article}
+\usepackage[a4paper,top=36pt,bottom=48pt,left=36pt,right=36pt]{geometry}
+\raggedright
+\raggedbottom
+\sloppy
+\usepackage{fontspec}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{centernot}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\newtheorem*{theorem}{Theorem}
+\newtheorem*{axiom}{Axiom}
+\newtheorem*{definition}{Definition}
+\newtheorem*{typedef}{Definition}
+\def\textunderscore{{\tt\char'137}}
+
+\newfontfamily\noto{Noto Mono}
+\def\copypastebackslash{\scalebox{0.001}[0.5]{\hbox{\color{white}\noto\char'134}}}
+\def\copypastesubleft{\scalebox{0.001}[0.5]{\hbox{\color{white}\noto\char'137\char'173}}}
+\def\copypastesupleft{\scalebox{0.001}[0.5]{\hbox{\color{white}\noto\char'136\char'173}}}
+\def\copypasteright{\scalebox{0.001}[0.5]{\hbox{\color{white}\noto\char'175}}}
+
+\def\subscript#1{_{\copypastesubleft #1\copypasteright}}
+\def\superscript#1{^{\copypastesupleft #1\copypasteright}}
+
+\def\relname#1{\mathrel{\operatorname{#1}}}
+\def\ordname#1{\mathord{\operatorname{#1}}}
+\def\opname#1{\operatorname{#1}}
+\def\textcomma{,\penalty501{ }}
+
+''')
+
+print(constants_tex)
+print(r'\begin{document}')
+
+for line in sys.stdin:
+  words = line.split()
+  if len(words) == 0: continue
+  typedefnames = None
+
+  try:
+    if words[0] == 'axiom':
+      name = ' axiom'
+      _,t = words
+    elif words[0] == 'definition':
+      name = ' definition'
+      _,t = words
+    elif words[0] == 'typedef':
+      name = ' typedef'
+      _,t = words[:2]
+      typedefnames = ' '.join(words[2:]) # XXX do we care about multiple spaces?
+      typedefnames = typedefnames.split(']')
+      assert len(typedefnames) >= 5
+      assert typedefnames[0] == ''
+      assert typedefnames[-1] == ''
+      typedefnames = typedefnames[1:-1]
+    else:
+      assert words[0] == 'theorem'
+      _,name,t = words
+    t = parse_term(t)
+  except:
+    print(f'% TODO parsing failed')
+    print()
+    continue
+
+  print(format_theorem(t,name,typedefnames=typedefnames))
+
+print(r'\end{document}')

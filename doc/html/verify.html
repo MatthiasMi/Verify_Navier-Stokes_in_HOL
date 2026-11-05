@@ -1,0 +1,188 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style type="text/css">
+html{overflow-y:scroll;background-color:#505050}
+body{font-family:"Noto Sans","Droid Sans","DejaVu Sans","Arial",sans-serif;line-height:1.5}
+tt,code{background-color:#f0f0f0;font-family:"Noto Sans Mono","Droid Sans Mono","DejaVu Sans Mono","Courier New",monospace,sans-serif;font-size:1em;}
+pre{margin-left:3em}
+p,ul,ol,blockquote,pre{font-size:1.0em;line-height:1.6}
+li p{font-size:1.0em}
+blockquote p{font-size:1.0em}
+h1{font-size:1.5em}
+h2{font-size:1.3em}
+h3{font-size:1.0em}
+h1 a{text-decoration:none}
+table{border-collapse:collapse}
+th,td{border:1px solid black}
+table a{text-decoration:none}
+table tr{font-size:1.0em;line-height:1.6em}
+table tr{font-size:1.0em;line-height:1.5}
+tbody tr:nth-child(12n+1){background-color:#f0ffff}
+tbody tr:nth-child(12n+2){background-color:#f0ffff}
+tbody tr:nth-child(12n+3){background-color:#f0ffff}
+tbody tr:nth-child(12n+4){background-color:#f0ffff}
+tbody tr:nth-child(12n+5){background-color:#f0ffff}
+tbody tr:nth-child(12n+6){background-color:#f0ffff}
+tbody tr:nth-child(12n+7){background-color:#fffff0}
+tbody tr:nth-child(12n+8){background-color:#fffff0}
+tbody tr:nth-child(12n+9){background-color:#fffff0}
+tbody tr:nth-child(12n+10){background-color:#fffff0}
+tbody tr:nth-child(12n+11){background-color:#fffff0}
+tbody tr:nth-child(12n+12){background-color:#fffff0}
+
+#headline{display:block;margin:0;padding:0;color:#ffffff;background-color:#505050}
+#headline .text{font-weight:bold;font-size:1.0em}
+#headline input{display:none}
+#nav ul{margin:0;padding:0}
+#nav li{list-style-type:none;margin:0;padding:0}
+.navtop{padding-bottom:0.5em;font-weight:bold;font-size:1.0em}
+.navtop{background-color:#505050;color:#ffffff}
+#nav .here{background-color:#505050;color:#ffffff}
+#nav .away{background-color:#505050;color:#ffffff}
+#nav .away a{text-decoration:none;display:block;color:#ffffff}
+#nav .away a:hover,.away a:active{text-decoration:underline}
+#hidemenu{visibility:hidden;display:none;overflow:hidden;position:fixed;top:0;left:0;height:100%;width:100%}
+
+.main{padding:5px}
+.main{background-color:#ffffff}
+.pagetitle{font-size:1.4em;font-weight:bold}
+@media only screen and (min-width:512px) {
+  .navtop{padding-top:5px}
+  #headline{top:0;margin:0;width:160px;height:100%;position:fixed;overflow:auto}
+  #headline .noselect{display:none}
+  #headline #nav{visibility:visible;display:block;width:auto;height:auto}
+  .main{margin-left:170px}
+  #headline #hidemenu{visibility:hidden}
+}
+@media not screen and (min-width:512px) {
+  #headline .noselect{-webkit-user-select:none;-ms-user-select:none;user-select:none;}
+  #headline #nav #navbot{visibility:hidden;position:fixed;top:0;left:-70%;z-index:2;transition:0.2s;margin:0;padding:0}
+  #headline input:checked ~ #nav #navbot{height:100%;position:fixed;top:0;left:0;visibility:visible;display:block;box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;vertical-align:center;font-size:1.0em;width:70%;overflow:auto}
+  #headline input:checked ~ #hidemenu{visibility:visible;display:block;background:black;opacity:0.3;z-index:1}
+}
+</style>
+<title>
+HOLTrace: Verify</title>
+</head>
+<body>
+<label id=headline>
+<input type=checkbox />
+<nav id=nav>
+<div class=navtop>
+<span class=noselect>≡</span>
+HOLTrace</div>
+<ul id=navbot>
+<li class=away><a href=index.html>Intro</a>
+</li><li class=away><a href=download.html>Download</a>
+</li><li class=away><a href=install.html>Install</a>
+</li><li class=away><a href=test.html>Test</a>
+</li><li class=away><a href=save.html>Save</a>
+</li><li class=away><a href=prune.html>Prune</a>
+</li><li class=here>Verify
+</li><li class=away><a href=tex.html>TeX</a>
+</li><li class=away><a href=ml.html>ML REPL</a>
+</li><li class=away><a href=prooftrace.html>ProofTrace</a>
+</li><li class=away><a href=opentheory.html>OpenTheory</a>
+</li><li class=away><a href=format.html>Format</a>
+</li><li class=away><a href=license.html>License</a>
+</li><li class=away><a href=bib.html>Literature</a>
+</li></ul></nav>
+<div id=hidemenu></div>
+</label>
+<div class=main>
+<div class=pagetitle>HOLTrace: Verify</div>
+<p>The recommended tools for verifying HOLTrace files
+are <code>holtrace_restore</code> and its <a href="#variants">variants</a>.
+There are also some <a href="#experimental">experimental</a> tools.</p>
+<p><code>holtrace_restore</code> is a command available in a new HOL Light session
+after HOLTrace is <a href="install.html">installed</a>.
+Running</p>
+<pre><code>holtrace_restore !theorems "holtrace-12345.50";;
+</code></pre>
+<p>will read and verify a trace file <code>holtrace-12345.50</code>.
+Verification checks the following:</p>
+<ul>
+<li>The HOL Light kernel accepts the types, terms, and inferences in the trace.</li>
+<li>The resulting theorems match the theorem statements in the trace.</li>
+<li>If any name in the trace matches a name
+  listed in <code>!theorems</code>
+  then the theorem by that name in the trace matches the theorem by that name listed in <code>!theorems</code>.</li>
+<li>Axioms in the trace are already in the kernel's <code>axioms()</code> list.</li>
+<li>Constant definitions in the trace
+  are already in the kernel's <code>definitions()</code> list.</li>
+<li>Type definitions in the trace
+  are already in the <code>holtrace_typedef_thms()</code> list.</li>
+</ul>
+<p>The <code>holtrace_typedef_thms()</code> list is not in the kernel;
+it is a separate list maintained by HOLTrace,
+whether or not traces are being
+<a href="save.html">saved</a> in this session.
+The <code>!theorems</code> list is also outside the kernel but is built into HOL Light.</p>
+<p>Verification remembers named theorems from the trace
+(whether or not those are listed in <code>!theorems</code>),
+and you can inspect those theorems
+until they are erased by the next <code>holtrace_restore</code> run:</p>
+<pre><code>holtrace_restore_name2thm "ONE_OR_PRIME";;
+</code></pre>
+<p>On <a href="install.html"><code>rome1</code></a>,
+restoring the pruned 37.6MB trace from <code>hol.ml</code>
+takes 61 seconds after <code>./install+hashtt</code>
+or 49 seconds after <code>./install</code>,
+using about 400MB extra RAM.</p>
+<h2 id="variants">Variants</h2>
+<p>There is a <code>holtrace_restore_allownew</code> variant
+that will instead add any new axioms,
+add any new constant definitions (failing if the constant name is used already),
+and add any new type definitions (again failing on collisions).</p>
+<p>With more work to add bindings for new names and any related syntax,
+it should be possible to use <code>holtrace_restore</code> and <code>holtrace_restore_allownew</code>
+to build a faster replacement for the normal loading of <code>hol.ml</code>
+or of other HOL Light libraries.
+There is also an even faster variant <code>holtrace_restore_skipthmchecks</code>
+(for <code>hol.ml</code>: 28 seconds after <code>./install+hashtt</code>,
+24 seconds after <code>./install</code>)
+that should be suitable in this context:
+this variant skips checking whether the theorems
+match the theorem statements in the trace,
+but still runs all of the same inferences through the HOL Light kernel.</p>
+<h2 id="experimental">Experimental tools</h2>
+<p>There are currently two experimental command-line tools for verifying traces.
+First,
+<code>holtrace-verify-simple</code> <em>tries</em> to verify traces
+in essentially the same way that the HOL Light kernel does.
+Beware that this tool is likely to have soundness bugs
+that let it accept false theorems:
+the tool has had vastly less review than the HOL Light kernel.</p>
+<p>This tool is written in Python.
+On <a href="install.html"><code>rome1</code></a>,
+<code>holtrace-verify-simple</code>
+takes 58.38 seconds and 778MB RAM
+given the 37.6MB pruned <code>hol.ml</code> trace as input.
+It takes 5.98 seconds and 128MB RAM
+given the 2.4MB pruned <code>ONE_OR_PRIME</code> trace as input.</p>
+<p>Second,
+<code>holtrace-verify</code> <em>tries</em> to verify traces
+and is more efficient than the HOL Light kernel.
+Beware that this tool is even more likely than <code>holtrace-verify-simple</code>
+to have soundness bugs
+that let it accept false theorems:
+the tool has had vastly less review than the HOL Light kernel
+<em>and</em> is more complicated than <code>holtrace-verify-simple</code>.
+Furthermore, unlike <code>holtrace-verify-simple</code>,
+this tool currently does not check whether a name refers to multiple theorems.</p>
+<p><code>holtrace-verify</code> is written in C
+and is not necessarily safe to run on untrusted input.
+A VM is recommended.</p>
+<p>On <a href="install.html"><code>rome1</code></a>,
+<code>holtrace-verify</code>
+takes 1.43 seconds and 259MB RAM
+given the 37.6MB pruned HOLTrace file as input.
+It takes 0.10 seconds and 20MB RAM
+given the 2.4MB <code>ONE_OR_PRIME</code> pruned HOLTrace file as input.</p><hr><font size=1><b>Version:</b>
+This is version 2025.07.14 of the "Verify" web page.
+</font>
+</div>
+</body>
+</html>

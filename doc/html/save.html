@@ -1,0 +1,191 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style type="text/css">
+html{overflow-y:scroll;background-color:#505050}
+body{font-family:"Noto Sans","Droid Sans","DejaVu Sans","Arial",sans-serif;line-height:1.5}
+tt,code{background-color:#f0f0f0;font-family:"Noto Sans Mono","Droid Sans Mono","DejaVu Sans Mono","Courier New",monospace,sans-serif;font-size:1em;}
+pre{margin-left:3em}
+p,ul,ol,blockquote,pre{font-size:1.0em;line-height:1.6}
+li p{font-size:1.0em}
+blockquote p{font-size:1.0em}
+h1{font-size:1.5em}
+h2{font-size:1.3em}
+h3{font-size:1.0em}
+h1 a{text-decoration:none}
+table{border-collapse:collapse}
+th,td{border:1px solid black}
+table a{text-decoration:none}
+table tr{font-size:1.0em;line-height:1.6em}
+table tr{font-size:1.0em;line-height:1.5}
+tbody tr:nth-child(12n+1){background-color:#f0ffff}
+tbody tr:nth-child(12n+2){background-color:#f0ffff}
+tbody tr:nth-child(12n+3){background-color:#f0ffff}
+tbody tr:nth-child(12n+4){background-color:#f0ffff}
+tbody tr:nth-child(12n+5){background-color:#f0ffff}
+tbody tr:nth-child(12n+6){background-color:#f0ffff}
+tbody tr:nth-child(12n+7){background-color:#fffff0}
+tbody tr:nth-child(12n+8){background-color:#fffff0}
+tbody tr:nth-child(12n+9){background-color:#fffff0}
+tbody tr:nth-child(12n+10){background-color:#fffff0}
+tbody tr:nth-child(12n+11){background-color:#fffff0}
+tbody tr:nth-child(12n+12){background-color:#fffff0}
+
+#headline{display:block;margin:0;padding:0;color:#ffffff;background-color:#505050}
+#headline .text{font-weight:bold;font-size:1.0em}
+#headline input{display:none}
+#nav ul{margin:0;padding:0}
+#nav li{list-style-type:none;margin:0;padding:0}
+.navtop{padding-bottom:0.5em;font-weight:bold;font-size:1.0em}
+.navtop{background-color:#505050;color:#ffffff}
+#nav .here{background-color:#505050;color:#ffffff}
+#nav .away{background-color:#505050;color:#ffffff}
+#nav .away a{text-decoration:none;display:block;color:#ffffff}
+#nav .away a:hover,.away a:active{text-decoration:underline}
+#hidemenu{visibility:hidden;display:none;overflow:hidden;position:fixed;top:0;left:0;height:100%;width:100%}
+
+.main{padding:5px}
+.main{background-color:#ffffff}
+.pagetitle{font-size:1.4em;font-weight:bold}
+@media only screen and (min-width:512px) {
+  .navtop{padding-top:5px}
+  #headline{top:0;margin:0;width:160px;height:100%;position:fixed;overflow:auto}
+  #headline .noselect{display:none}
+  #headline #nav{visibility:visible;display:block;width:auto;height:auto}
+  .main{margin-left:170px}
+  #headline #hidemenu{visibility:hidden}
+}
+@media not screen and (min-width:512px) {
+  #headline .noselect{-webkit-user-select:none;-ms-user-select:none;user-select:none;}
+  #headline #nav #navbot{visibility:hidden;position:fixed;top:0;left:-70%;z-index:2;transition:0.2s;margin:0;padding:0}
+  #headline input:checked ~ #nav #navbot{height:100%;position:fixed;top:0;left:0;visibility:visible;display:block;box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;vertical-align:center;font-size:1.0em;width:70%;overflow:auto}
+  #headline input:checked ~ #hidemenu{visibility:visible;display:block;background:black;opacity:0.3;z-index:1}
+}
+</style>
+<title>
+HOLTrace: Save</title>
+</head>
+<body>
+<label id=headline>
+<input type=checkbox />
+<nav id=nav>
+<div class=navtop>
+<span class=noselect>≡</span>
+HOLTrace</div>
+<ul id=navbot>
+<li class=away><a href=index.html>Intro</a>
+</li><li class=away><a href=download.html>Download</a>
+</li><li class=away><a href=install.html>Install</a>
+</li><li class=away><a href=test.html>Test</a>
+</li><li class=here>Save
+</li><li class=away><a href=prune.html>Prune</a>
+</li><li class=away><a href=verify.html>Verify</a>
+</li><li class=away><a href=tex.html>TeX</a>
+</li><li class=away><a href=ml.html>ML REPL</a>
+</li><li class=away><a href=prooftrace.html>ProofTrace</a>
+</li><li class=away><a href=opentheory.html>OpenTheory</a>
+</li><li class=away><a href=format.html>Format</a>
+</li><li class=away><a href=license.html>License</a>
+</li><li class=away><a href=bib.html>Literature</a>
+</li></ul></nav>
+<div id=hidemenu></div>
+</label>
+<div class=main>
+<div class=pagetitle>HOLTrace: Save</div>
+<p>The main mechanism to create new traces is <code>holtrace-save</code>,
+after which the traces will typically be processed by
+<a href="prune.html"><code>holtrace-prune</code></a> and further tools.
+It is also possible to convert
+<a href="prooftrace.html">ProofTrace</a> files
+(or
+<a href="opentheory.html">OpenTheory</a> files)
+to HOLTrace format,
+but generating HOLTrace format directly from HOL Light
+is faster than generating ProofTrace format.</p>
+<p>As an example of tracing,
+if HOLTrace is
+<a href="install.html">installed</a>
+and <code>tracedivstep.ml</code> contains</p>
+<pre><code>needs "Divstep/make.ml";;
+needs "update_database.ml";;
+update_database();;
+holtrace_namethm !theorems;;
+</code></pre>
+<p>then the shell command</p>
+<pre><code>env EDITOR=env ./holtrace-save \
+&lt; tracedivstep.ml &gt; tracedivstep.out 2&gt;&amp;1
+</code></pre>
+<p>will trace <code>Divstep/make.ml</code>.
+The trace will be in a new file, separate from <code>tracedivstep.out</code>.</p>
+<h2>Functions</h2>
+<p><code>holtrace-save</code> is a command-line tool that starts HOL Light,
+similarly to <code>hol.sh</code>:</p>
+<pre><code>./holtrace-save
+</code></pre>
+<p>The difference is that
+<code>holtrace-save</code> saves the proofs and theorems in the HOL Light session.
+These are saved in a file with a name of the form <code>holtrace-*.50</code>.
+The <code>*</code> part includes the date and process ID,
+so this name is very likely to be new,
+but if it is not then the old file will be removed.</p>
+<p>The trace file automatically accumulates proofs and theorems
+as HOL Light is running.
+It does not record names of theorems
+until you run</p>
+<pre><code>holtrace_namethm !theorems;;
+</code></pre>
+<p>using HOL Light's built-in list <code>!theorems</code> of name-theorem pairs.
+The built-in list has only the HOL Light standard library by default,
+but HOL Light has an <code>update_database()</code> command
+that extends the list to cover further named theorems proven in this session.
+There is also <code>holtrace_nameonethm</code> to handle a single name-theorem pair.</p>
+<p>You can stop the tracing in this session:</p>
+<pre><code>holtrace_stop();;
+</code></pre>
+<p>Restarting tracing within the same session is not supported.
+Also, checkpointing is not supported in combination with tracing.</p>
+<h2>Performance</h2>
+<p>Tracing slows down HOL Light,
+as the following comparison illustrates:</p>
+<ul>
+<li>
+<p>On <a href="install.html"><code>rome1</code></a>,
+  a normal <code>hol.sh</code> run takes 154 seconds to load HOL Light's standard library (<code>hol.ml</code>),
+  allocating 758MB RAM and using 495MB RAM.</p>
+</li>
+<li>
+<p>A <code>holtrace-save</code> run after <a href="install.html"><code>./install</code></a>
+  instead takes 2145 seconds,
+  allocating 2196MB RAM and using 1930MB RAM.
+  The resulting trace for <code>hol.ml</code> is
+  82MB (<code>gzip -9</code> reduces this to 20.7MB).</p>
+</li>
+<li>
+<p>A <code>holtrace-save</code> run after <a href="install.html"><code>./install+hashtt</code></a>
+  takes 522 seconds,
+  allocating 2348MB RAM and using 2074MB RAM.</p>
+</li>
+</ul>
+<h2>Internals</h2>
+<p>The <code>holtrace-save</code> command is a simple shell script that picks a filename,
+sets the <code>HOLTRACE_SAVE</code> environment variable to that filename,
+and runs <code>hol.sh</code>.</p>
+<p>The main work is then handled by the <code>Holtrace_save</code> module in <code>holtrace.ml</code>.
+This module is a wrapper around the HOL Light kernel.
+The wrapper redefines
+<code>new_axiom</code>,
+<code>new_basic_definition</code>,
+<code>new_basic_type_definition</code>,
+and the primitive inference rules such as <code>REFL</code>.
+If <code>HOLTRACE_SAVE</code> is not set,
+the wrapper keeps the original definitions,
+except that it modifies <code>new_basic_type_definition</code>
+to keep a <code>!holtrace_typedef_thms</code> list
+used by the <code>Holtrace_restore</code> module for
+<a href="verify.html">verification</a>.</p><hr><font size=1><b>Version:</b>
+This is version 2025.07.05 of the "Save" web page.
+</font>
+</div>
+</body>
+</html>

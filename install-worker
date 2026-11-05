@@ -1,0 +1,346 @@
+#!/usr/bin/env pypy3
+
+import os
+import sys
+import shutil
+import string
+import multiprocessing
+
+# ===== base install
+
+def install_base(dir,uninstall=False):
+  if uninstall:
+    os.remove(f'{dir}/holtrace.ml')
+  else:
+    shutil.copy('holtrace.ml',f'{dir}/holtrace.ml')
+
+  fnlib = f'{dir}/hol_lib.ml'
+  with open(fnlib) as f:
+    x = f.read()
+
+  y = ''
+  for line in x.splitlines():
+    if uninstall:
+      if "holtrace.ml" in line: continue
+    else:
+      if 'nets.ml' in line:
+        y += 'loads "holtrace.ml";;\n'
+    y += line+'\n'
+
+  if y != x:
+    with open(fnlib,'w') as f:
+      f.write(y)
+
+# ===== hashtt install
+
+def processwords(W):
+  result = []
+  prevword = ''
+  parenstack = []
+  commas = []
+  for w in W:
+    if w[0] in ('(','['):
+      parenstack.append(prevword)
+      commas.append(0)
+    elif w[0] == ',':
+      if len(commas) > 0:
+        commas[-1] += 1
+    elif w[0] in (')',']'):
+      if len(parenstack) > 0:
+        thisword = parenstack.pop()
+        thiscommas = commas.pop()
+        if thiscommas == 1:
+          if thisword in ('Tyapp','Const','Var','Comb','Abs','Sequent'):
+            result.append([',',''])
+            result.append(['_',''])
+    result.append(w)
+    prevword = w[0]
+  return result
+
+def process(x):
+  W = [['','']]
+  for c in x:
+    if c.isalpha():
+      if len(W[-1][1]) > 0 or (len(W[-1][0]) > 0 and not W[-1][0].isalpha()):
+        W += [['','']]
+      W[-1][0] += c
+    elif c.isspace():
+      W[-1][1] += c
+    else:
+      if W[-1] != ['','']:
+        W += [['','']]
+      W[-1][0] += c
+  W = processwords(W)
+  return ''.join(''.join(w) for w in W)
+
+def process_fusion(x):
+  x = process(x)
+  result = ''
+  for line in x.splitlines():
+    line = line.replace('Tyapp of string *  hol_type list','Tyapp of string *  hol_type list * int')
+    line = line.replace('Var of string * hol_type','Var of string * hol_type * int')
+    line = line.replace('Const of string * hol_type','Const of string * hol_type * int')
+    line = line.replace('Comb of term * term','Comb of term * term * int')
+    line = line.replace('Abs of term * term','Abs of term * term * int')
+    line = line.replace('Sequent of (term list * term)','Sequent of (term list * term * int)')
+    # mk_type
+    line = line.replace('Tyapp(tyop,args,_)','unchecked_mk_type(tyop,args)')
+    # type_subst
+    line = line.replace("Tyapp(tycon,args',_)","unchecked_mk_type(tycon,args')")
+    # bool_ty
+    line = line.replace('Tyapp("bool",[],_)','unchecked_mk_type("bool",[])')
+    # the_term_constants
+    line = line.replace('["=",Tyapp("fun",[aty;Tyapp("fun",[aty;bool_ty],_)],_)]','["=",unchecked_mk_type("fun",[aty;unchecked_mk_type("fun",[aty;bool_ty])])]')
+    # type_of
+    line = line.replace('Tyapp("fun",[ty;type_of t],_)','unchecked_mk_type("fun",[ty;type_of t])')
+    # mk_var
+    line = line.replace('Var(v,ty,_)','let h = Hashtbl.hash(v,hash_type ty,641559254) in Var(v,ty,h)')
+    # mk_const
+    line = line.replace('Const(name,type_subst theta uty,_)','unchecked_mk_const(name,type_subst theta uty)')
+    # mk_abs
+    line = line.replace('Abs(bvar,bod,_)','unchecked_mk_abs(bvar,bod)')
+    # mk_comb
+    line = line.replace('Comb(f,a,_)','unchecked_mk_comb(f,a)')
+    # variant
+    line = line.replace('Var(s^"\'",ty,_)','mk_var(s^"\'",ty)')
+    # vsubst
+    line = line.replace("Comb(s',t',_)","unchecked_mk_comb(s',t')")
+    line = line.replace("Abs(v',vsubst ((v',v)::ilist') s,_)","unchecked_mk_abs(v',vsubst ((v',v)::ilist') s)")
+    line = line.replace("Abs(v,s',_)","unchecked_mk_abs(v,s')")
+    # inst
+    line = line.replace("Var(n,ty',_)","mk_var(n,ty')")
+    line = line.replace("Const(c,ty',_)","unchecked_mk_const(c,ty')")
+    line = line.replace("Comb(f',x',_)","unchecked_mk_comb(f',x')")
+    line = line.replace("Abs(y',t',_)","unchecked_mk_abs(y',t')")
+    line = line.replace("Var(fst(dest_var y''),snd(dest_var y),_)","mk_var(fst(dest_var y''),snd(dest_var y))")
+    line = line.replace("(Abs(z,vsubst[z,y] t,_))","(unchecked_mk_abs(z,vsubst[z,y] t))")
+    # safe_mk_eq
+    line = line.replace('Comb(Comb(Const("=",Tyapp("fun",[ty;Tyapp("fun",[ty;bool_ty],_)],_),_),l,_),r,_)','unchecked_mk_comb(unchecked_mk_comb(unchecked_mk_const("=",unchecked_mk_type("fun",[ty;unchecked_mk_type("fun",[ty;bool_ty])])),l),r)')
+    # REFL
+    line = line.replace('Sequent([],safe_mk_eq tm tm,_)','mk_sequent([],safe_mk_eq tm tm)')
+    # TRANS
+    line = line.replace('Sequent(term_union asl1 asl2,Comb(eql,r,_),_)','mk_sequent(term_union asl1 asl2,unchecked_mk_comb(eql,r))')
+    # MK_COMB
+    if line.strip() == '-> Sequent(term_union asl1 asl2,':
+      line = line.replace('Sequent(term_union asl1 asl2,','mk_sequent(term_union asl1 asl2,')
+    line = line.replace('safe_mk_eq (Comb(l1,l2,_)) (Comb(r1,r2,_)),_)','safe_mk_eq (unchecked_mk_comb(l1,l2)) (unchecked_mk_comb(r1,r2)))')
+    # ABS
+    line = line.replace('Sequent(asl,safe_mk_eq (Abs(v,l,_)) (Abs(v,r,_)),_)','mk_sequent(asl,safe_mk_eq (unchecked_mk_abs(v,l)) (unchecked_mk_abs(v,r)))')
+    # BETA
+    line = line.replace('Sequent([],safe_mk_eq tm bod,_)','mk_sequent([],safe_mk_eq tm bod)')
+    # ASSUME
+    line = line.replace('Sequent([tm],tm,_)','mk_sequent([tm],tm)')
+    # EQ_MP
+    line = line.replace('Sequent(term_union asl1 asl2,r,_)','mk_sequent(term_union asl1 asl2,r)')
+    # DEDUCT_ANTISYM_RULE
+    line = line.replace("Sequent(term_union asl1' asl2',safe_mk_eq c1 c2,_)","mk_sequent(term_union asl1' asl2',safe_mk_eq c1 c2)")
+    # INST_TYPE
+    line = line.replace('Sequent(term_image inst_fn asl,inst_fn c,_)','mk_sequent(term_image inst_fn asl,inst_fn c)')
+    # INST
+    line = line.replace('Sequent(term_image inst_fun asl,inst_fun c,_)','mk_sequent(term_image inst_fun asl,inst_fun c)')
+    # new_axiom
+    line = line.replace('Sequent([],tm,_)','mk_sequent([],tm)')
+    # new_basic_definition
+    line = line.replace('; Const(cname,ty,_)','; unchecked_mk_const(cname,ty)')
+    line = line.replace('Sequent([],safe_mk_eq c r,_)','mk_sequent([],safe_mk_eq c r)')
+    # new_basic_type_definition
+    line = line.replace('= Tyapp(tyname,tyvars,_)','= unchecked_mk_type(tyname,tyvars)')
+    line = line.replace('absty = Tyapp("fun",[rty;aty],_) and repty = Tyapp("fun",[aty;rty],_)','absty = unchecked_mk_type("fun",[rty;aty]) and repty = unchecked_mk_type("fun",[aty;rty])')
+    line = line.replace('; Const(absname,absty,_)','; unchecked_mk_const(absname,absty)')
+    line = line.replace('; Const(repname,repty,_)','; unchecked_mk_const(repname,repty)')
+    line = line.replace('a = Var("a",aty,_) and r = Var("r",rty,_)','a = mk_var("a",aty) and r = mk_var("r",rty)')
+    line = line.replace('Sequent([],safe_mk_eq (Comb(abs,mk_comb(rep,a),_)) a,_)','mk_sequent([],safe_mk_eq (unchecked_mk_comb(abs,mk_comb(rep,a))) a)')
+    line = line.replace('Sequent([],safe_mk_eq (Comb(P,r,_))','mk_sequent([],safe_mk_eq (unchecked_mk_comb(P,r))')
+    line = line.replace('(safe_mk_eq (mk_comb(rep,mk_comb(abs,r))) r),_)','(safe_mk_eq (mk_comb(rep,mk_comb(abs,r))) r))')
+
+    if line.strip() == 'let mk_type(tyop,args) =':
+      result += r'''  let unchecked_mk_type(tyop,args) =
+    let h = Hashtbl.hash(tyop,map hash_type args,466104544) in
+    Tyapp(tyop,args,h)
+
+'''
+
+    if line.strip() == 'let mk_const(name,theta) =':
+      result += r'''  let unchecked_mk_const(name,ty) =
+    let h = Hashtbl.hash(name,hash_type ty,286759410) in
+    Const(name,ty,h)
+
+'''
+
+    if line.strip() == 'let mk_abs(bvar,bod) =':
+      result += r'''  let unchecked_mk_abs(bvar,bod) =
+    let h = Hashtbl.hash(hash_term bvar,hash_term bod,511457769) in
+    Abs(bvar,bod,h)
+
+'''
+
+    if line.strip() == 'let mk_comb(f,a) =':
+      result += r'''  let unchecked_mk_comb(f,a) =
+    let h = Hashtbl.hash(hash_term f,hash_term a,612029959) in
+    Comb(f,a,h)
+
+'''
+
+    result += line+'\n'
+
+    if line.strip() == 'type thm':
+      result += r'''
+      val hash_type: hol_type -> int
+      val hash_term: term -> int
+      val hash_thm: thm -> int
+'''
+    if line.strip() == 'type thm = Sequent of (term list * term * int)':
+      result += r'''
+  let hash_type =
+    function
+      Tyvar v -> Hashtbl.hash v
+    | Tyapp(_,_,h) -> h
+
+  let hash_term =
+    function
+      Var(_,_,h) -> h
+    | Const(_,_,h) -> h
+    | Comb(_,_,h) -> h
+    | Abs(_,_,h) -> h
+
+  let mk_sequent(asl,c) =
+    let h = Hashtbl.hash(map hash_term (c::asl)) in
+    Sequent(asl,c,h)
+
+  let hash_thm =
+    function
+      Sequent(_,_,h) -> h
+'''
+
+  return result
+
+def process_holtrace(x):
+  x = process(x)
+
+  defined_hashtbl_type = False
+  defined_hashtbl_term = False
+  defined_hashtbl_thm = False
+
+  result = ''
+  for line in x.splitlines():
+    if 'Hashtbl.' in line:
+      if 'type2id' in line:
+        if not defined_hashtbl_type:
+          result += r'''  module Hashtbl_type = Hashtbl.Make(struct
+    type t = hol_type
+    let equal ty0 ty1 = (ty0 == ty1) || ((hash_type ty0 = hash_type ty1) && (ty0 = ty1))
+    let hash = hash_type
+  end)
+'''
+          defined_hashtbl_type = True
+        line = line.replace('Hashtbl.','Hashtbl_type.')
+      elif 'term2id' in line:
+        if not defined_hashtbl_term:
+          result += r'''  module Hashtbl_term = Hashtbl.Make(struct
+    type t = term
+    let equal tm0 tm1 = (tm0 == tm1) || ((hash_term tm0 = hash_term tm1) && (tm0 = tm1))
+    let hash = hash_term
+  end)
+'''
+          defined_hashtbl_term = True
+        line = line.replace('Hashtbl.','Hashtbl_term.')
+      elif 'thm2id' in line:
+        if not defined_hashtbl_thm:
+          result += r'''  module Hashtbl_thm = Hashtbl.Make(struct
+    type t = thm
+    let equal th0 th1 = (th0 == th1) || ((hash_thm th0 = hash_thm th1) && equals_thm th0 th1)
+    let hash = hash_thm
+  end)
+'''
+          defined_hashtbl_thm = True
+        line = line.replace('Hashtbl.','Hashtbl_thm.')
+
+    result += line+'\n'
+
+  return result
+
+def hashtt_todo(dir):
+  for (subdir,dirnames,filenames) in os.walk(dir):
+    for fn in filenames:
+      if fn.endswith('.ml'):
+        yield f'{subdir}/{fn}'
+
+bak = '.hashtt-bak'
+assert len(bak) > 0
+
+def hashtt_doit(fn):
+  try:
+    with open(fn) as f: x = f.read()
+  except:
+    return
+  if fn.endswith('/fusion.ml'):
+    y = process_fusion(x)
+  elif fn.endswith('/holtrace.ml'):
+    y = process_holtrace(x)
+  else:
+    y = process(x)
+  if y == x: return
+  mode = os.stat(fn).st_mode
+  os.rename(fn,fn+bak)
+  with open(fn,'w') as f: f.write(y)
+  os.chmod(fn,mode)
+
+def install_hashtt(dir,uninstall=False):
+  if uninstall:
+    for (subdir,dirnames,filenames) in os.walk(dir):
+      for fn in filenames:
+        if fn.endswith('.ml'+bak):
+          origfn = fn[:-len(bak)]
+          os.rename(f'{subdir}/{fn}',f'{subdir}/{origfn}')
+    return
+
+  with multiprocessing.Pool(16) as p:
+    for result in p.imap_unordered(hashtt_doit,hashtt_todo(dir),1):
+      pass
+
+# ===== main
+
+def guessdir():
+  path = os.getenv('PATH',default='/bin:/usr/bin')
+  for dir in path.split(':'):
+    if dir == '': dir = '.'
+    fn = dir+'/hol.sh'
+    if not os.path.exists(fn): continue
+    with open(fn) as f:
+      for line in f:
+        line = line.strip()
+        prefix = 'export HOLLIGHT_DIR='
+        if line.startswith(prefix):
+          return line[len(prefix):]
+  raise Exception('unable to find HOL Light directory via hol.sh; please specify HOL Light directory on the command line')
+
+if len(sys.argv) <= 1:
+  raise Exception('please specify command')
+
+cmd = sys.argv[1]
+assert cmd in ('uninstall','install','install+hashtt')
+if len(sys.argv) <= 2:
+  dir = guessdir()
+else:
+  dir = sys.argv[2]
+
+fninstalled = f'{dir}/INSTALLED-HOLTrace'
+fninstalledhashtt = f'{dir}/INSTALLED-HOLTrace+hashtt'
+
+# remove existing installation first
+# (even if we want to end up installed;
+# maybe current installation is earlier version)
+if os.path.exists(fninstalled):
+  if os.path.exists(fninstalledhashtt):
+    install_hashtt(dir,uninstall=True)
+    os.remove(fninstalledhashtt)
+  install_base(dir,uninstall=True)
+  os.remove(fninstalled)
+
+if cmd in ('install','install+hashtt'):
+  with open(fninstalled,'w') as f: pass
+  install_base(dir)
+
+if cmd == 'install+hashtt':
+  with open(fninstalledhashtt,'w') as f: pass
+  install_hashtt(dir)

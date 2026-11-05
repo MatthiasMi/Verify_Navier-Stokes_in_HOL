@@ -1,0 +1,5 @@
+#!/bin/sh
+
+export HOLTRACE_SAVE=`date +holtrace-%Y%m%d-%H%M%S.%N-$$.50`
+rm -f $HOLTRACE_SAVE
+exec hol.sh "$@"

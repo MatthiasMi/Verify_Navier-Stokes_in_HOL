@@ -1,0 +1,3265 @@
+
+./holtrace-verify
+> input does not start with HOLTrace 1
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: empty file
+failure 1
+
+< 
+./holtrace-verify
+> input does not start with HOLTrace 1
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 0: blank line is prohibited
+failure 1
+
+< b0bool
+./holtrace-verify
+> input does not start with HOLTrace 1
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 1: not HOLTrace 1
+failure 1
+
+< HOLTrace
+./holtrace-verify
+> input does not start with HOLTrace 1
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 1: not HOLTrace 1
+failure 1
+
+< HOLTrace 1
+./holtrace-verify
+> verified 11 bytes, 1 lines, 0 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 11 bytes, 1 lines, 0 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< a	tab # bad character
+./holtrace-verify
+> byte 9 is not printable ASCII
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 1: byte 9 is prohibited
+failure 1
+
+< HOLTrace 1
+< u # bad tag
+./holtrace-verify
+> line 2: unrecognized tag u
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: unrecognized tag u
+failure 1
+
+< HOLTrace 1
+< a # not enough args
+./holtrace-verify
+> line 2: empty name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing text
+failure 1
+
+< HOLTrace 1
+< aA # ok
+./holtrace-verify
+> verified 14 bytes, 2 lines, 1 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 14 bytes, 2 lines, 1 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< a?328 # ok
+./holtrace-verify
+> verified 17 bytes, 2 lines, 1 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 17 bytes, 2 lines, 1 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< bx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b1 # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0 # not enough args
+./holtrace-verify
+> line 2: empty name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing text
+failure 1
+
+< HOLTrace 1
+< b100000000000 # check handling of big numbers
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b200000000000 # check handling of big numbers
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b400000000000 # check handling of big numbers
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b800000000000 # check handling of big numbers
+./holtrace-verify
+> line 2: refusing to handle number 288230376151711744
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< bG00000000000 # check handling of big numbers
+./holtrace-verify
+> line 2: refusing to handle number 576460752303423488
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b1000000000000 # check handling of big numbers
+./holtrace-verify
+> line 2: refusing to handle number 1152921504606846976
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b2000000000000 # check handling of big numbers
+./holtrace-verify
+> line 2: refusing to handle number 2305843009213693952
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b4000000000000 # check handling of big numbers
+./holtrace-verify
+> line 2: refusing to handle number 4611686018427387904
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b8000000000000 # check handling of big numbers
+./holtrace-verify
+> line 2: refusing to handle number 288230376151711744
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< bG000000000000 # check handling of big numbers
+./holtrace-verify
+> line 2: refusing to handle number 576460752303423488
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< bbool # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b1bool # missing number
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b!bool # out of range
+./holtrace-verify
+> line 2: result -2 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b-1bool # out of range
+./holtrace-verify
+> line 2: result -2 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b-0bool # out of range
+./holtrace-verify
+> line 2: result -1 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b0bool # ok
+./holtrace-verify
+> verified 18 bytes, 2 lines, 1 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 18 bytes, 2 lines, 1 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b00bool # ok, leading zeros allowed
+./holtrace-verify
+> verified 19 bytes, 2 lines, 1 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 19 bytes, 2 lines, 1 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0ind # ok
+./holtrace-verify
+> verified 17 bytes, 2 lines, 1 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 17 bytes, 2 lines, 1 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0undef # undefined type
+./holtrace-verify
+> line 2: undefined app name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: undefined type
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b!bool # arg count must be numeric
+./holtrace-verify
+> line 3: result -2 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 3: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b1!bool # too many args for bool
+./holtrace-verify
+> line 3: wrong number of app arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 3: wrong number of app arguments
+failure 1
+
+< HOLTrace 1
+< b0fun # not enough args for fun
+./holtrace-verify
+> line 2: wrong number of app arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: wrong number of app arguments
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b!!fun # missing number
+./holtrace-verify
+> line 3: result -2 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 3: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!@fun # out of range
+./holtrace-verify
+> line 3: result -1 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 3: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun # ok
+./holtrace-verify
+> verified 26 bytes, 3 lines, 2 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 26 bytes, 3 lines, 2 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2 0 0fun # ok
+./holtrace-verify
+> verified 28 bytes, 3 lines, 2 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 28 bytes, 3 lines, 2 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2 0 0 fun # ok
+./holtrace-verify
+> verified 29 bytes, 3 lines, 2 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 29 bytes, 3 lines, 2 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b2 0 0 fun # out of range
+./holtrace-verify
+> line 2: result 0 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b2 0 1 fun # out of range
+./holtrace-verify
+> line 2: result 0 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b2 1 1 fun # out of range
+./holtrace-verify
+> line 2: result 1 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2 0 1 fun # out of range
+./holtrace-verify
+> line 3: result 1 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 3: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2!@fun # ok
+./holtrace-verify
+> verified 34 bytes, 4 lines, 3 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 34 bytes, 4 lines, 3 types, 0 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< c # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< cx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< c! # not enough args
+./holtrace-verify
+> line 3: empty name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 3: missing text
+failure 1
+
+< HOLTrace 1
+< b0bool
+< c!p # undefined constant
+./holtrace-verify
+> line 3: undefined constant
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 3: constant name p undefined
+failure 1
+
+< HOLTrace 1
+< b0bool
+< c!= # wrong type for =
+./holtrace-verify
+> line 3: non-equality type
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 3: type mismatch
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!= # ok
+./holtrace-verify
+> verified 38 bytes, 5 lines, 3 types, 1 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 38 bytes, 5 lines, 3 types, 1 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< d # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< dx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d! # not enough args
+./holtrace-verify
+> line 3: empty name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 3: missing text
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p # ok
+./holtrace-verify
+> verified 22 bytes, 3 lines, 1 types, 1 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 22 bytes, 3 lines, 1 types, 1 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< d!pq # ok
+./holtrace-verify
+> verified 23 bytes, 3 lines, 1 types, 1 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 23 bytes, 3 lines, 1 types, 1 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< e # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< ex # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< e! # out of range, and not enough args
+./holtrace-verify
+> line 2: result -1 out of range
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: numeric argument out of range
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< e! # not enough args
+./holtrace-verify
+> line 4: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< e!! # not enough args
+./holtrace-verify
+> line 4: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< e!!!! # extra arg
+./holtrace-verify
+> line 4: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< e!!! # wrong type
+./holtrace-verify
+> line 4: combination mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: wrong type
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< b2!!fun
+< d!f
+< e!!@ # wrong type
+./holtrace-verify
+> line 6: combination mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: wrong type
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< b2!!fun
+< d!f
+< e@!@ # ok
+./holtrace-verify
+> verified 39 bytes, 6 lines, 2 types, 3 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 39 bytes, 6 lines, 2 types, 3 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< d!p
+< b0bool
+< b2!!fun
+< d!f
+< e@!@ # ok with duplicated bool
+./holtrace-verify
+> verified 46 bytes, 7 lines, 3 types, 3 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 46 bytes, 7 lines, 3 types, 3 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< d!p
+< b0bool
+< b2!!fun
+< d!f
+< e#!@ # ok with duplicated bool
+./holtrace-verify
+> verified 46 bytes, 7 lines, 3 types, 3 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 46 bytes, 7 lines, 3 types, 3 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< f # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< fx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< d!q
+< b2!!fun
+< f@!@! # extra arg
+./holtrace-verify
+> line 6: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=
+< f!!! # non-variable (and other issues)
+./holtrace-verify
+> line 6: non-variable lambda
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: non-variable
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< d!q
+< b2!!fun
+< f@!@ # wrong type
+./holtrace-verify
+> line 6: lambda mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: wrong type
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< d!q
+< b2!!fun
+< f!!@ # ok
+./holtrace-verify
+> verified 39 bytes, 6 lines, 2 types, 3 terms, 0 infs, 0 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 39 bytes, 6 lines, 2 types, 3 terms, 0 infs, 0 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< t # not enough args
+./holtrace-verify
+> line 2: theorem with no conclusion
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing inference before theorem
+failure 1
+
+< HOLTrace 1
+< tx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing inference before theorem
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< t! # missing inference
+./holtrace-verify
+> line 4: theorem without preceding inference
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: missing inference before theorem
+failure 1
+
+< HOLTrace 1
+< X # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Xx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!x # extra arg
+./holtrace-verify
+> line 4: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< t # missing conclusion
+./holtrace-verify
+> line 5: theorem with no conclusion
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 5: missing conclusion
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< t! # ok
+./holtrace-verify
+> verified 28 bytes, 5 lines, 1 types, 1 terms, 1 infs, 1 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 28 bytes, 5 lines, 1 types, 1 terms, 1 infs, 1 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< d!p
+< t! # ok
+./holtrace-verify
+> verified 32 bytes, 6 lines, 1 types, 2 terms, 1 infs, 1 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 32 bytes, 6 lines, 1 types, 2 terms, 1 infs, 1 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< b0bool
+< d!p
+< t! # ok
+./holtrace-verify
+> verified 39 bytes, 7 lines, 2 types, 2 terms, 1 infs, 1 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 39 bytes, 7 lines, 2 types, 2 terms, 1 infs, 1 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< b0bool
+< d!q
+< t! # name mismatch
+./holtrace-verify
+> line 7: conclusion mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 7: theorem not proven by inference
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< b0ind
+< d!p
+< t! # type mismatch
+./holtrace-verify
+> line 7: conclusion mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 7: theorem not proven by inference
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< d@p
+< f!!!
+< X! # non-bool
+./holtrace-verify
+> line 6: AXIOM: non-bool input
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: AXIOM: non-bool
+failure 1
+
+< HOLTrace 1
+< U # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Ux # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< U!x # extra arg
+./holtrace-verify
+> line 4: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< U!
+< tx # non-numeric
+./holtrace-verify
+> line 5: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 5: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< U!
+< t!! # ok
+./holtrace-verify
+> verified 29 bytes, 5 lines, 1 types, 1 terms, 1 infs, 1 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 29 bytes, 5 lines, 1 types, 1 terms, 1 infs, 1 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< d@p
+< f!!!
+< U! # non-bool
+./holtrace-verify
+> line 6: ASSUME: non-bool input
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: ASSUME: non-bool
+failure 1
+
+< HOLTrace 1
+< R # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Rx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!x # extra arg
+./holtrace-verify
+> line 4: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< t! # wrong theorem statement
+./holtrace-verify
+> line 5: conclusion mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 5: theorem not proven by inference
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< b2!!fun
+< b2@!fun
+< c!=
+< e1!@
+< e0!#
+< t!
+< /!peqp
+< t!
+< /!peqpcopy # ok
+./holtrace-verify
+> verified 79 bytes, 13 lines, 3 types, 4 terms, 1 infs, 2 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 79 bytes, 13 lines, 3 types, 4 terms, 1 infs, 2 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< b2!!fun
+< b2@!fun
+< c!=
+< e1!@
+< e0!#
+< t!! # extra hypothesis
+./holtrace-verify
+> line 10: wrong number of hypotheses
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 10: theorem not proven by inference
+failure 1
+
+< HOLTrace 1
+< B # non-bool
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Bx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< B! # non-eval
+./holtrace-verify
+> line 4: BETA: operation mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: BETA: non-eval
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< b2!!fun
+< d!f
+< e@!@
+< B! # eval but not of mapsto
+./holtrace-verify
+> line 7: BETA: combination is not of abstraction
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 7: BETA: non-mapsto
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< d!q
+< b2!!fun
+< f!@!
+< e0!1
+< B! # variable mismatch
+./holtrace-verify
+> line 8: BETA: combination is not of same variable
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 8: BETA: variable mismatch
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< d!q
+< b2!!fun
+< f!@!
+< e0!0
+< B!x # extra arg
+./holtrace-verify
+> line 8: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 8: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< d!q
+< b2!!fun
+< f!@!
+< e0!0
+< B!
+< b2@!fun
+< c!=
+< e1!@
+< e0!0
+< t! # wrong theorem statement
+./holtrace-verify
+> line 13: conclusion mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 13: theorem not proven by inference
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< d!q
+< b2!!fun
+< f!@!
+< e0!0
+< B!
+< b2@!fun
+< c!=
+< e1!@
+< e0!1
+< t! # ok
+./holtrace-verify
+> verified 72 bytes, 13 lines, 3 types, 7 terms, 1 infs, 1 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 72 bytes, 13 lines, 3 types, 7 terms, 1 infs, 1 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< V # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Vx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< t!
+< V!!x # extra arg
+./holtrace-verify
+> line 6: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< t!
+< V!! # first (and second) conclusion not equality
+./holtrace-verify
+> line 6: TRANS: first operation mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: TRANS: first conclusion not equality
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=
+< d0p
+< d0q
+< e1 0 1
+< e0!2
+< X!
+< t!
+< X1
+< t1
+< V@! # second conclusion not equality
+./holtrace-verify
+> line 14: TRANS: second operation mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 14: TRANS: second conclusion not equality
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=
+< d0p
+< d0q
+< d0r
+< e1 0 1
+< e0!2
+< X!
+< t!
+< e1 0 2
+< e0!3
+< X!
+< t!
+< V!@ # mismatch
+./holtrace-verify
+> line 17: TRANS: input mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 17: TRANS: mismatch
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=
+< d0p
+< d0q
+< d0r
+< e1 0 1
+< e0!2
+< X!
+< t!
+< e1 0 2
+< e0!3
+< X!
+< t!
+< V@!
+< e1 0 1
+< e0!3
+< t! # ok
+./holtrace-verify
+> verified 105 bytes, 20 lines, 3 types, 10 terms, 3 infs, 3 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 105 bytes, 20 lines, 3 types, 10 terms, 3 infs, 3 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=
+< d0p
+< d0q
+< d0r
+< e1 0 1
+< e0!2
+< X!
+< t!
+< e1 0 2
+< e0!3
+< X!
+< t!
+< V@!
+< e1 0 1
+< e0!3
+< t!! # wrong number of hypotheses
+./holtrace-verify
+> line 20: wrong number of hypotheses
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 20: theorem not proven by inference
+failure 1
+
+< HOLTrace 1
+< E # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Ex # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< t!
+< E!!x # extra arg
+./holtrace-verify
+> line 6: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< t!
+< E!! # first (and second) conclusion not equality
+./holtrace-verify
+> line 6: MK_COMB: first theorem is not equality
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: MK_COMB: first conclusion non-equality
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=
+< d0p
+< d0q
+< e1 0 1
+< e0!2
+< X!
+< t!
+< X1
+< t1
+< E@! # second conclusion not equality
+./holtrace-verify
+> line 14: MK_COMB: second theorem is not equality
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 14: MK_COMB: second conclusion non-equality
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< d1f
+< d1g
+< b2 1 0fun
+< b2 1!fun
+< c!=
+< e@!#
+< e0!#
+< X!
+< t!
+< E!! # mismatch
+./holtrace-verify
+> line 14: MK_COMB: combination mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 14: MK_COMB: type mismatch
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=
+< d0p
+< d0q
+< e1 0 1
+< e0!2
+< X!
+< t!
+< d1f
+< d1g
+< b2 1 0fun
+< b2 1!fun
+< c!=
+< e@!#
+< e0!#
+< X!
+< t!
+< E@! # first equality is not of functions
+./holtrace-verify
+> line 21: first MK_COMB: type is not function
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 21: MK_COMB: first equality is not of functions
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=
+< d0p
+< d0q
+< e1 0 1
+< e0!2
+< X!
+< t!
+< d1f
+< d1g
+< b2 1 0fun
+< b2 1!fun
+< c!=
+< e@!#
+< e0!#
+< X!
+< t!
+< E!@
+< e0 5 1
+< e0 6 2
+< e1 0@
+< e0!@
+< t! # ok
+./holtrace-verify
+> verified 143 bytes, 26 lines, 5 types, 14 terms, 3 infs, 3 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 143 bytes, 26 lines, 5 types, 14 terms, 3 infs, 3 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< P # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Px # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< t!
+< P!!x # extra arg
+./holtrace-verify
+> line 6: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< t!
+< P!! # first conclusion non-equality
+./holtrace-verify
+> line 6: EQ_MP: operation mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: EQ_MP: first conclusion non-equality
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=
+< d0p
+< d0q
+< e1 0 1
+< e0!2
+< X!
+< t!
+< X2
+< t2
+< P@! # mismatch
+./holtrace-verify
+> line 14: EQ_MP: left-side mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 14: EQ_MP: mismatch
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< d0q    # 2 q:bool
+< e1 0 1 # 3 p =
+< e0!2   # 4 p = q
+< X!
+< t!
+< X1
+< t1
+< P@!
+< t2 # ok
+./holtrace-verify
+> verified 77 bytes, 15 lines, 3 types, 5 terms, 3 infs, 3 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 77 bytes, 15 lines, 3 types, 5 terms, 3 infs, 3 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< f1!!   # 2 p|->p
+< d0q    # 3 q:bool
+< f1!!   # 4 q|->q
+< d0r    # 5 r:bool
+< f1!!   # 6 r|->r
+< d0x    # 7 x:bool
+< e0 2 7 # 8 (p|->p)x
+< e0 4 7 # 9 (q|->q)x
+< e0 6 7 # 10 (r|->r)x
+< X!
+< t!     # thm0 (r|->r)x
+< e1 0 8 # 11 (p|->p)x =
+< e0!9   # 12 (p|->p)x = (q|->q)x
+< X!
+< t!     # thm1 (p|->p)x = (q|->q)x
+< P!@
+< t9     # ok thm2 (q|->q)x
+./holtrace-verify
+> verified 121 bytes, 23 lines, 3 types, 13 terms, 3 infs, 3 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 121 bytes, 23 lines, 3 types, 13 terms, 3 infs, 3 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< Z # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Zx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< f1!!   # 2 p|->p
+< d0q    # 3 q:bool
+< f1!!   # 4 q|->q
+< d0r    # 5 r:bool
+< f1!!   # 6 r|->r
+< d0x    # 7 x:bool
+< e0 2 7 # 8 (p|->p)x
+< e0 4 7 # 9 (q|->q)x
+< e0 6 7 # 10 (r|->r)x
+< X!
+< t!     # thm0 (r|->r)x
+< e1 0 8 # 11 (p|->p)x =
+< e0!9   # 12 (p|->p)x = (q|->q)x
+< X!
+< t!     # thm1 (p|->p)x = (q|->q)x
+< U8
+< t8 8   # thm2 (p|->p)x entails (p|->p)x
+< P1 2
+< t8 9   # thm3 (p|->p)x entails (q|->q)x
+< Z0 3
+< e1 0 A
+< e0!9
+< t!     # (r|->r)x = (q|->q)x
+< Z3 3
+< e1 0 9
+< e0!9
+< t!     # ok (q|->q)x = (q|->q)x
+./holtrace-verify
+> verified 172 bytes, 33 lines, 3 types, 17 terms, 6 infs, 6 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 172 bytes, 33 lines, 3 types, 17 terms, 6 infs, 6 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< F # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Fx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d0p
+< X!
+< t!
+< F!! # non-equation
+./holtrace-verify
+> line 6: ABS: second input is not an equality
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: ABS: non-equality
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< d0q    # 2 q:bool
+< e1 0 1 # 3 p =
+< e0!2   # 4 p = q
+< X!
+< t!
+< F0!x # extra arg
+./holtrace-verify
+> line 12: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 12: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< d0q    # 2 q:bool
+< e1 0 1 # 3 p =
+< e0!2   # 4 p = q
+< X!
+< t!     # thm0 p = q
+< F0! # non-variable
+./holtrace-verify
+> line 12: ABS: first input is not a variable
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 12: ABS: non-variable
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< d0q    # 2 q:bool
+< e1 0 1 # 3 p =
+< e0!2   # 4 p = q
+< X!
+< t!     # thm0 p = q
+< d0v    # 5 v:bool
+< F5!
+< f1 5 1 # 6 v|->p
+< f1 5 2 # 7 v|->q
+< b2 1 0fun
+< b2 1!fun
+< c!=    # 8 =:(bool->bool)->(bool->bool)->bool
+< e3!6   # 9 (v|->p) =
+< e0!7   # 10 (v|->p) = (v|->q)
+< t! # ok
+./holtrace-verify
+> verified 122 bytes, 21 lines, 5 types, 11 terms, 2 infs, 2 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 122 bytes, 21 lines, 5 types, 11 terms, 2 infs, 2 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< d0q    # 2 q:bool
+< e1 0 1 # 3 p =
+< e0!2   # 4 p = q
+< U!
+< t!!    # thm0 p = q entails p = q
+< F1! # bad, p free in hypothesis
+./holtrace-verify
+> line 12: ABS variable is free in hypothesis
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 12: ABS: variable is free in hypotheses
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< d0q    # 2 q:bool
+< e1 0 1 # 3 p =
+< e0!2   # 4 p = q
+< U!
+< t!!    # thm0 p = q entails p = q
+< F2! # bad, q free in hypothesis
+./holtrace-verify
+> line 12: ABS variable is free in hypothesis
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 12: ABS: variable is free in hypotheses
+failure 1
+
+< HOLTrace 1
+< S # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Sx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d0p    # 0 p:bool
+< U!
+< t!!    # thm0: p entails p
+< S!
+< t0 0 # ok
+./holtrace-verify
+> verified 37 bytes, 7 lines, 1 types, 1 terms, 2 infs, 2 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 37 bytes, 7 lines, 1 types, 1 terms, 2 infs, 2 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< U!
+< t!!    # thm0: p entails p
+< S!x # non-numeric arg
+./holtrace-verify
+> line 9: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 9: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< U!
+< t!!    # thm0: p entails p
+< S!0x # non-numeric arg
+./holtrace-verify
+> line 9: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 9: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< U!
+< t!!    # thm0: p entails p
+< S!0 # odd number of args
+./holtrace-verify
+> line 9: INST: odd number of term arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 9: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< U!
+< t!!    # thm0: p entails p
+< S!0 1 # non-variable
+./holtrace-verify
+> line 9: INST: substituting for non-variable (note: S th from to, not S th to from)
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 9: INST: non-var
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< U!
+< t!!    # thm0: p entails p
+< S!1 0 # mismatch
+./holtrace-verify
+> line 9: INST: type mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 9: INST: type mismatch
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< d0p    # 0 p:bool
+< d0q    # 1 q:bool
+< U!
+< t!!    # thm0: q entails q
+< S!1 0
+< t0 0   # ok thm1: p entails p
+./holtrace-verify
+> verified 60 bytes, 10 lines, 3 types, 2 terms, 2 infs, 2 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 60 bytes, 10 lines, 3 types, 2 terms, 2 infs, 2 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< d0p    # 0 p:bool
+< d0q    # 1 q:bool
+< U!
+< t!!    # thm0: q entails q
+< S!1 0 0 # odd number of args
+./holtrace-verify
+> line 9: INST: odd number of term arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 9: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< U!
+< t!!    # thm0: p entails p
+< d0q    # 2 q:bool
+< d0r    # 3 r:bool
+< e1 0 2 # 4 q =
+< e0!3   # 5 q = r
+< S!1 5
+< t5 5   # ok thm1: q = r entails q = r
+./holtrace-verify
+> verified 80 bytes, 14 lines, 3 types, 6 terms, 2 infs, 2 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 80 bytes, 14 lines, 3 types, 6 terms, 2 infs, 2 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< d0q    # 2 q:bool
+< d0r    # 3 r:bool
+< e1 0 2 # 4 q =
+< e0!3   # 5 q = r
+< U!
+< t!!    # thm0: q = r entails q = r
+< S!2 1
+< e1 0 1 # 6 p =
+< e0!3   # 7 p = r
+< t!!    # thm1: p = r entails p = r
+< S!1 3 3 1
+< e1 0 3 # 8 r =
+< e0!1   # 9 r = p
+< t!!    # thm2: r = p entails r = p
+< S!3 2 1 3
+< t5 5   # thm3: q = r entails q = r
+< S@1 3 3 2
+< t5 5   # thm4: q = r entails q = r
+< S#1 3 3 2 1 2 # second 1->... is ignored
+< t5 5   # ok thm5: q = r entails q = r
+./holtrace-verify
+> verified 166 bytes, 26 lines, 3 types, 10 terms, 6 infs, 6 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 166 bytes, 26 lines, 3 types, 10 terms, 6 infs, 6 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< d0p    # 0 p:bool
+< d0q    # 1 q:bool
+< f1 0 0 # 2 p|->p
+< e0!1   # 3 (p|->p)q
+< X!
+< t!     # thm0 (p|->p)q
+< S!0 0  # p to p
+< t!     # thm1 (p|->p)q
+< S!0 1  # p to q
+< t!     # thm2 (p|->p)q
+< S!1 1  # q to q
+< t!     # thm3 (p|->p)q
+< S!1 0  # q to p
+< e0 2 0 # 4 (p|->p)p
+< t!     # ok thm4 (p|->p)p
+./holtrace-verify
+> verified 95 bytes, 18 lines, 2 types, 5 terms, 5 infs, 5 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 95 bytes, 18 lines, 2 types, 5 terms, 5 infs, 5 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< d0p    # 0 p:bool
+< d0q    # 1 q:bool
+< f1 0 0 # 2 p|->p
+< e0!1   # 3 (p|->p)q
+< X!
+< t!     # thm0 (p|->p)q
+< f1 1 0 # 4 q|->p
+< e0!1   # 5 (q|->p)q
+< S!0 0  # p to p
+< t!     # mismatch
+./holtrace-verify
+> line 13: conclusion mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 13: theorem not proven by inference
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< d0q    # 2 q:bool
+< e1 0 1 # 3 p =
+< e0!2   # 4 p = q
+< f1 1 4 # 5 p|->p=q
+< f2 2 5 # 6 q|->p|->p=q
+< R!     # (q|->p|->p=q)=(q|->p|->p=q)
+< b2!0fun # (bool->bool->bool)->bool
+< b2@!fun # (bool->bool->bool)->(bool->bool->bool)->bool
+< c!=    # 7 = on bool->bool->bool
+< e@!@   # 8 (q|->p|->p=q) =
+< e0!#   # 9 (q|->p|->p=q) = (q|->p|->p=q)
+< t!     # thm0
+< S!1 2 2 1  # p to q, q to p
+< t!     # ok
+./holtrace-verify
+> verified 121 bytes, 20 lines, 5 types, 10 terms, 2 infs, 2 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 121 bytes, 20 lines, 5 types, 10 terms, 2 infs, 2 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< d0q    # 2 q:bool
+< e1 0 1 # 3 p =
+< e0!2   # 4 p = q
+< f1 1!  # 5 p|->p=q
+< d0r    # 6 r:bool
+< e0@!   # 7 (p|->p=q)r
+< X!
+< t!     # thm0 (p|->p=q)r
+< S!1 1  # p to p
+< t!     # thm1 (p|->p=q)r
+< S!2 2  # q to q
+< t!     # thm2 (p|->p=q)r
+< S!6 6  # r to r
+< t!     # thm3 (p|->p=q)r
+< S!1 2  # p to q
+< t!     # thm4 (p|->p=q)r
+< S!1 6  # p to r
+< t!     # thm5 (p|->p=q)r
+< S!2 6  # q to r
+< e0 3 6 # 8 p = r
+< f1 1!  # 9 p|->p=r
+< e0!6   # 10 (p|->p=r)r
+< t!     # thm6 (p|->p=r)r
+< S0 2 1 # q to p in thm0
+< d0p'   # 11 p':bool
+< e1 0!  # 12 p' =
+< e0!1   # 13 p' = p
+< f1#!   # 14 p'|->p'=p
+< e0!6   # 15 (p'|->p'=p)r
+< t!     # thm7 (p'|->p'=p)r
+< S0 6 1 # r to p in thm0
+< e0 5 1 # 16 (p|->p=q)p
+< t!
+< S0 6 2 # r to q in thm0
+< e0 5 2 # 17 (p|->p=q)q
+< t! # ok
+./holtrace-verify
+> verified 221 bytes, 42 lines, 3 types, 18 terms, 10 infs, 10 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 221 bytes, 42 lines, 3 types, 18 terms, 10 infs, 10 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< d0p'   # 2 p':bool
+< d0p''  # 3 p'':bool
+< d0p''' # 4 p''':bool
+< e1 0 2 # 5 p'=
+< e0!1   # 6 p'=p
+< e1 0 3 # 7 p''=
+< e0!6   # 8 p''=(p'=p)
+< f1 1!  # 9 p|->p''=(p'=p)
+< e0!4   # 10 (p|->p''=(p'=p))(p''')
+< X!
+< t!     # thm0: (p|->p''=(p'=p))(p''')
+< S!1 1
+< t!     # thm1: (p|->p''=(p'=p))(p''')
+< S!2 2
+< t!     # thm2: (p|->p''=(p'=p))(p''')
+< S!3 3
+< t!     # thm3: (p|->p''=(p'=p))(p''')
+< S!4 4
+< t!     # thm4: (p|->p''=(p'=p))(p''')
+< S!2 1 # p' to p
+< e1 0 1 # 11 p=
+< e0!2   # 12 p=p'
+< e0 7!  # 13 p''=(p=p')
+< f1 2!  # 14 p'|->p''=(p=p')
+< e0!4   # 15 (p'|->p''=(p=p'))(p''')
+< t!     # thm5: (p'|->p''=(p=p'))(p''')
+< S0 3 1 # p'' to p in thm0
+< e0 5 3 # 16 p'=p''
+< e0 B!  # 17 p=(p'=p'')
+< f1 3!  # 18 p''|->p=(p'=p'')
+< e0!4   # 19 (p''|->p=(p'=p''))(p''')
+< t!     # thm6: (p''|->p=(p'=p''))(p''')
+< S0 2 C # p' to p=p' in thm0
+< e1 0 C # 20 (p=p')=
+< e0!4   # 21 (p=p')=p'''
+< e0 7!  # 22 p''=((p=p')=p''')
+< f1 4!  # 23 p'''|->p''=((p=p')=p''')
+< e0!4   # 24 (p'''|->p''=((p=p')=p'''))(p''')
+< t! # ok
+./holtrace-verify
+> verified 248 bytes, 45 lines, 3 types, 25 terms, 8 infs, 8 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 248 bytes, 45 lines, 3 types, 25 terms, 8 infs, 8 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< U!
+< t!!    # thm0: p entails p
+< d0q    # 2 q:bool
+< U!
+< t!!    # thm1: q entails q
+< Z@!
+< e1 0 1 # 3 p=
+< e0!2   # 4 p=q
+< t1 2 4 # thm2: p,q entail p=q
+< f1 1 1 # 5 p|->p
+< d0r    # 6 r:bool
+< e0@!   # 7 (p|->p)r
+< f1 2 2 # 8 q|->q
+< e0!#   # 9 (q|->q)r
+< S!1 7 2 9
+< e1 0 7 # 10 (p|->p)r=
+< e0!9   # 11 (p|->p)r=(q|->q)r
+< t7!    # thm3: (p|->p)r entails (p|->p)r=(q|->q)r
+< S2 2 7 1 9
+< e1 0 9
+< e0!7
+< t9! # ok thm4: (q|->q)r entails (q|->q)r=(p|->p)r
+./holtrace-verify
+> verified 164 bytes, 28 lines, 3 types, 14 terms, 5 infs, 5 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 164 bytes, 28 lines, 3 types, 14 terms, 5 infs, 5 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< T # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Tx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d0p    # 0 p:bool
+< U!
+< t!!    # thm0: p entails p
+< T!
+< t0 0 # ok
+./holtrace-verify
+> verified 37 bytes, 7 lines, 1 types, 1 terms, 2 infs, 2 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 37 bytes, 7 lines, 1 types, 1 terms, 2 infs, 2 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< d0p    # 0 p:bool
+< U!
+< t!!    # thm0: p entails p
+< aA
+< T!x # non-numeric arg
+./holtrace-verify
+> line 7: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 7: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d0p    # 0 p:bool
+< U!
+< t!!    # thm0: p entails p
+< aA
+< T!!x # non-numeric arg
+./holtrace-verify
+> line 7: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 7: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d0p    # 0 p:bool
+< U!
+< t!!    # thm0: p entails p
+< aA
+< T!! # odd number of args
+./holtrace-verify
+> line 7: INST_TYPE: odd number of type arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 7: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d0p    # 0 p:bool
+< U!
+< t!!    # thm0: p entails p
+< aA
+< T!!!
+< t!! # ok
+./holtrace-verify
+> verified 41 bytes, 8 lines, 2 types, 1 terms, 2 infs, 2 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 41 bytes, 8 lines, 2 types, 1 terms, 2 infs, 2 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< d0p    # 0 p:bool
+< U!
+< t!!    # thm0: p entails p
+< aA
+< T!!@ # ok
+./holtrace-verify
+> verified 37 bytes, 7 lines, 2 types, 1 terms, 2 infs, 1 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 37 bytes, 7 lines, 2 types, 1 terms, 2 infs, 1 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool
+< d0p    # 0 p:bool
+< U!
+< t!!    # thm0: p entails p
+< aA
+< T!@! # non-tyvar
+./holtrace-verify
+> line 7: INST_TYPE: substituting for non-tyvar (note: T th from to, not T th to from)
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 7: INST_TYPE: non-tyvar (HOL Light ignores this)
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< aA        # ty1 A
+< b2!@fun   # ty2 A->bool
+< b2@!fun   # ty3 A->A->bool
+< c!=       # 0 =:A->A->bool
+< d1p       # 1 p:A
+< e2 0!     # 2 (p:A)=
+< e0!@      # 3 (p:A)=p
+< X!
+< t!        # thm0 (p:A)=p
+< T!1 1
+< t!        # thm1 (p:A)=p
+< T!1 0
+< d0p       # 4 p:bool
+< b2 0 0fun # ty4 bool->bool
+< b2 0!fun  # ty5 bool->bool->bool
+< c!=       # 5 =:bool->bool
+< e4!4      # 6 (p:bool)=
+< e0!4      # 7 (p:bool)=p
+< t!        # ok thm2 (p:bool)=p
+./holtrace-verify
+> verified 117 bytes, 21 lines, 6 types, 8 terms, 3 infs, 3 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 117 bytes, 21 lines, 6 types, 8 terms, 3 infs, 3 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< aA        # ty1 A
+< d!p       # 0 p:A
+< aB        # ty2 B
+< d!p       # 1 p:B
+< b2 1 2fun # ty3 A->B
+< f3 0 1    # 2 (p:A)|->(p:B)
+< b2 3 0fun # ty4 (A->B)->bool
+< b2 3 4fun # ty5 (A->B)->(A->B)->bool
+< c!=       # 3 = on A->B
+< e4!2      # 4 ((p:A)|->(p:B))=
+< e0!2      # 5 ((p:A)|->(p:B))=((p:A)|->(p:B))
+< X!
+< t!        # thm0 ((p:A)|->(p:B))=((p:A)|->(p:B))
+< T!1 1
+< t!
+< T!2 2
+< t!
+< T!1 1 2 2
+< t!
+< T!2 2 1 1
+< t!
+< T!1 1 1 2
+< t!
+< T!1 2
+< b2 2 2fun # ty6 B->B
+< b2!0fun   # ty7 (B->B)->bool
+< b2@!fun   # ty8 (B->B)->(B->B)->bool
+< c!=       # 6 = on B->B
+< d2p'      # 7 p':B
+< f#!1      # 8 (p':B)|->(p:B)
+< e@#!      # 9 ((p':B)|->(p:B))=
+< e0!@      # 10 ((p':B)|->(p:B))=((p':B)|->(p:B))
+< t!
+< T0 2 1
+< b2 1 1fun # ty9 A->A
+< b2!0fun   # ty10 (A->A)->bool
+< b2@!fun   # ty11 (A->A)->(A->A)->bool
+< c!=       # 6 = on A->A
+< d1p'      # 7 p':A
+< f#!0      # 8 (p':A)|->(p:A)
+< e@#!      # 9 ((p':A)|->(p:A))=
+< e0!@      # 10 ((p':A)|->(p:A))=((p':A)|->(p:A))
+< t! # ok
+./holtrace-verify
+> verified 265 bytes, 45 lines, 12 types, 16 terms, 8 infs, 8 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 265 bytes, 45 lines, 12 types, 16 terms, 8 infs, 8 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< C # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Cx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< C! # not enough args
+./holtrace-verify
+> line 4: empty name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: missing text
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< C!x # not equality
+./holtrace-verify
+> line 4: DEFINITION: operation mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 4: NEW_DEFINITION: non-equality
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< e1 0!  # 2 p=
+< e0!@   # 3 p=p
+< e1 0!  # 4 (p=p)=
+< e0!@   # 5 (p=p)=(p=p)
+< C!x # not variable on left
+./holtrace-verify
+> line 11: DEFINITION: not a variable
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 11: NEW_DEFINITION: non-variable
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< e1 0!  # 2 p=
+< e0!@   # 3 p=p
+< C!x # wrong variable name on left
+./holtrace-verify
+> line 9: DEFINITION: name mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 9: NEW_DEFINITION: name mismatch
+failure 1
+
+< HOLTrace 1
+< b0bool
+< b2!!fun
+< b2@!fun
+< c!=    # 0 =:bool->bool->bool
+< d0p    # 1 p:bool
+< e1 0!  # 2 p=
+< e0!@   # 3 p=p
+< C!p # free variables on right
+./holtrace-verify
+> line 9: DEFINITION: free variables on right side
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 9: NEW_DEFINITION: free variables
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< aA        # ty3 A
+< b2!0fun   # ty4 A->bool
+< b2@!fun   # ty5 A->A->bool
+< c!=       # 1 =:A->A->bool
+< d3p       # 2 p:A
+< b2 3 3fun # ty6 A->A
+< f!!!      # 3 p|->p
+< b2 6 0fun # ty7 (A->A)->bool
+< b2 6!fun  # ty8 (A->A)->(A->A)->bool
+< c!=       # 4 = on A->A
+< e7!3      # 5 (p|->p)=
+< e0!3      # 6 (p|->p)=(p|->p)
+< d0q       # 7 q:bool
+< e1 0!     # 8 q=
+< e0!#      # 9 q=((p|->p)=(p|->p))
+< C!q # missing tyvars
+./holtrace-verify
+> line 21: DEFINITION: type variables on right side not included in constant
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 21: NEW_DEFINITION: missing tyvars
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< b0bool    # ty3 bool
+< b2!0fun   # ty4 bool->bool
+< b2@!fun   # ty5 bool->bool->bool
+< c!=       # 1 =:bool->bool->bool
+< d3p       # 2 p:bool
+< b2 3 3fun # ty6 bool->bool
+< f!!!      # 3 p|->p
+< b2 6 0fun # ty7 (bool->bool)->bool
+< b2 6!fun  # ty8 (bool->bool)->(bool->bool)->bool
+< c!=       # 4 = on bool->bool
+< e7!3      # 5 (p|->p)=
+< e0!3      # 6 (p|->p)=(p|->p)
+< d0q       # 7 q:bool
+< e1 0!     # 8 q=
+< e0!#      # 9 q=((p|->p)=(p|->p))
+< C!q
+< c0q       # 10 constant q:bool
+< e1 0!
+< e0!6
+< t! # ok
+./holtrace-verify
+> verified 154 bytes, 25 lines, 9 types, 13 terms, 1 infs, 1 thms, 0 typedefs
+success
+./holtrace-verify-simple
+> verified 154 bytes, 25 lines, 9 types, 13 terms, 1 infs, 1 thms, 0 typedefs
+success
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< b0bool    # ty3 bool
+< b2!0fun   # ty4 bool->bool
+< b2@!fun   # ty5 bool->bool->bool
+< c!=       # 1 =:bool->bool->bool
+< d3p       # 2 p:bool
+< b2 3 3fun # ty6 bool->bool
+< f!!!      # 3 p|->p
+< b2 6 0fun # ty7 (bool->bool)->bool
+< b2 6!fun  # ty8 (bool->bool)->(bool->bool)->bool
+< c!=       # 4 = on bool->bool
+< e7!3      # 5 (p|->p)=
+< e0!3      # 6 (p|->p)=(p|->p)
+< d0q       # 7 q:bool
+< e1 0!     # 8 q=
+< e0!#      # 9 q=((p|->p)=(p|->p))
+< C!q
+< C!q # name used already
+./holtrace-verify
+> line 22: colliding const name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 22: constant name q already used
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< b0bool    # ty3 bool
+< b2!0fun   # ty4 bool->bool
+< b2@!fun   # ty5 bool->bool->bool
+< c!=       # 1 =:bool->bool->bool
+< d3p       # 2 p:bool
+< b2 3 3fun # ty6 bool->bool
+< f!!!      # 3 p|->p
+< b2 6 0fun # ty7 (bool->bool)->bool
+< b2 6!fun  # ty8 (bool->bool)->(bool->bool)->bool
+< c!=       # 4 = on bool->bool
+< e7!3      # 5 (p|->p)=
+< e0!3      # 6 (p|->p)=(p|->p)
+< d0=       # 7 =:bool
+< e1 0!     # 8 ==
+< e0!#      # 9 ==((p|->p)=(p|->p))
+< C!=
+./holtrace-verify
+> line 21: const name =
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 21: constant name = already used
+failure 1
+
+< HOLTrace 1
+< A # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Ax # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< D # not enough args
+./holtrace-verify
+> line 2: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< Dx # non-numeric
+./holtrace-verify
+> line 2: non-numeric argument where numeric is expected
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 2: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< A! # not enough args
+./holtrace-verify
+> line 5: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 5: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< A!! # not enough args
+./holtrace-verify
+> line 5: missing numeric argument
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 5: missing numeric argument
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< b2!!fun
+< b2@!fun
+< c!=
+< e1!@
+< e0!#
+< t!
+< A!!! # not enough args
+./holtrace-verify
+> line 11: empty name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 11: missing text
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< b2!!fun
+< b2@!fun
+< c!=
+< e1!@
+< e0!#
+< t!
+< A!!!foo # misformatted
+./holtrace-verify
+> line 11: TYPE_DEFINITION: misformatted
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 11: TYPE_DEFINITION: misformatted
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< b2!!fun
+< b2@!fun
+< c!=
+< e1!@
+< e0!#
+< t!
+< A!!!foo]]]] # misformatted
+./holtrace-verify
+> line 11: TYPE_DEFINITION: refusing non-bracket
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 11: TYPE_DEFINITION: misformatted
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< b2!!fun
+< b2@!fun
+< c!=
+< e1!@
+< e0!#
+< t!
+< A!!!]]]]foo # misformatted
+./holtrace-verify
+> line 11: TYPE_DEFINITION: partial final component
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 11: TYPE_DEFINITION: misformatted
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< U!
+< t!!
+< A!!!]]]] # hypotheses
+./holtrace-verify
+> line 6: TYPE_DEFINITION: input theorem has hypotheses
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: TYPE_DEFINITION: hypotheses
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< X!
+< t!
+< A!!!]]]] # non-eval
+./holtrace-verify
+> line 6: TYPE_DEFINITION: input theorem is not a combination
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 6: TYPE_DEFINITION: non-eval
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< b2!!fun
+< b2@!fun
+< c!=
+< e1!@
+< e0!#
+< t!
+< A!!!]]]] # repprop mismatch
+./holtrace-verify
+> line 11: TYPE_DEFINITION: repprop mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 11: TYPE_DEFINITION: repterm mismatch
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< b2!!fun
+< b2@!fun
+< c!=
+< e1!@
+< e0!#
+< t!
+< A!2!]]]] # reptype mismatch
+./holtrace-verify
+> line 11: TYPE_DEFINITION: reptype mismatch
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 11: TYPE_DEFINITION: reptype mismatch
+failure 1
+
+< HOLTrace 1
+< b0bool
+< d!p
+< R!
+< b2!!fun
+< b2@!fun
+< c!=
+< e1!@
+< e0!#
+< t!
+< A#2!]]]] # free variables in repprop
+./holtrace-verify
+> line 11: TYPE_DEFINITION: free variables in repprop
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 11: TYPE_DEFINITION: free variables
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< d0p       # 1 p:bool
+< f1!!      # 2 p|->p
+< b2 1 0fun # ty3 (bool->bool)->bool
+< b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+< c!=       # 3 = on bool->bool
+< e3!2      # 4 (p|->p)=
+< e0!2      # 5 (p|->p)=(p|->p)
+< d0q       # 6 q:bool
+< e1 0!     # 7 q=
+< e0!#      # 8 q=((p|->p)=(p|->p))
+< C!q
+< c0q       # 9 constant q:bool
+< e1 0!     # 10 q=
+< e0!5      # 11 q=((p|->p)=(p|->p))
+< t!        # thm0
+< d0r       # 12 r:bool
+< e1 0!     # 13 r=
+< e0!9      # 14 r=q
+< f1 C E    # 15 r|->r=q
+< e0!9      # 16 (r|->r=q)q
+< X!
+< t!        # thm1
+< A0 F!]ABSTYPE]ABS]REP]
+< b0 ABSTYPE # ty5 ABSTYPE
+< b2!0fun   # ty6 ABSTYPE->bool
+< b2 0@fun  # ty7 bool->ABSTYPE
+< c!ABS     # 17 ABS:bool->ABSTYPE
+< c@REP     # 18 REP:ABSTYPE->bool
+< d5a       # 19 a:ABSTYPE
+< e0@!      # 20 REP(a)
+< e5$!      # 21 ABS(REP(a))
+< b2 5 0fun # ty8 ABSTYPE->bool
+< b2 5!fun  # ty9 ABSTYPE->ABSTYPE->bool
+< c!=       # 22 = on ABSTYPE
+< e8!@      # 23 ABS(REP(a))=
+< e0!J      # 24 ABS(REP(a))=a
+< t!
+< D!
+< d0r       # 25 r:bool
+< e0 F!     # 26 (r|->r=q)r
+< e1 0!     # 27 (r|->r=q)r=
+< e5 H#     # 28 ABS(r)
+< e0 I!     # 29 REP(ABS(r))
+< e1 0!     # 30 REP(ABS(r))=
+< e0!^      # 31 REP(ABS(r))=r
+< e0%!      # 32 (r|->r=q)r=(REP(ABS(r))=r)
+< t! # ok
+./holtrace-verify
+> verified 313 bytes, 52 lines, 10 types, 33 terms, 4 infs, 4 thms, 1 typedefs
+success
+./holtrace-verify-simple
+> verified 313 bytes, 52 lines, 10 types, 33 terms, 4 infs, 4 thms, 1 typedefs
+success
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< d0p       # 1 p:bool
+< f1!!      # 2 p|->p
+< b2 1 0fun # ty3 (bool->bool)->bool
+< b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+< c!=       # 3 = on bool->bool
+< e3!2      # 4 (p|->p)=
+< e0!2      # 5 (p|->p)=(p|->p)
+< d0q       # 6 q:bool
+< e1 0!     # 7 q=
+< e0!#      # 8 q=((p|->p)=(p|->p))
+< C!q
+< c0q       # 9 constant q:bool
+< e1 0!     # 10 q=
+< e0!5      # 11 q=((p|->p)=(p|->p))
+< t!        # thm0
+< d0r       # 12 r:bool
+< e1 0!     # 13 r=
+< e0!9      # 14 r=q
+< f1 C E    # 15 r|->r=q
+< e0!9      # 16 (r|->r=q)q
+< X!
+< t!        # thm1
+< A0 F!]ABSTYPE]ABS]REP]
+< b0 ABSTYPE # ty5 ABSTYPE
+< b2!0fun   # ty6 ABSTYPE->bool
+< b2 0@fun  # ty7 bool->ABSTYPE
+< c!ABS     # 17 ABS:bool->ABSTYPE
+< c@REP     # 18 REP:ABSTYPE->bool
+< d5a       # 19 a:ABSTYPE
+< e0@!      # 20 REP(a)
+< e5$!      # 21 ABS(REP(a))
+< b2 5 0fun # ty8 ABSTYPE->bool
+< b2 5!fun  # ty9 ABSTYPE->ABSTYPE->bool
+< c!=       # 22 = on ABSTYPE
+< e8!@      # 23 ABS(REP(a))=
+< e0!J      # 24 ABS(REP(a))=a
+< t!
+< D!x # extra arg
+./holtrace-verify
+> line 43: extra arguments
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 43: extra argument
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< d0p       # 1 p:bool
+< f1!!      # 2 p|->p
+< b2 1 0fun # ty3 (bool->bool)->bool
+< b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+< c!=       # 3 = on bool->bool
+< e3!2      # 4 (p|->p)=
+< e0!2      # 5 (p|->p)=(p|->p)
+< d0q       # 6 q:bool
+< e1 0!     # 7 q=
+< e0!#      # 8 q=((p|->p)=(p|->p))
+< C!q
+< c0q       # 9 constant q:bool
+< e1 0!     # 10 q=
+< e0!5      # 11 q=((p|->p)=(p|->p))
+< t!        # thm0
+< d0r       # 12 r:bool
+< e1 0!     # 13 r=
+< e0!9      # 14 r=q
+< f1 C E    # 15 r|->r=q
+< e0!9      # 16 (r|->r=q)q
+< X!
+< t!        # thm1
+< A0 F!]ABSTYPE]ABS]REP]X] # extra tyvar
+./holtrace-verify
+> line 28: TYPE_DEFINITION: wrong number of tyvars
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 28: TYPE_DEFINITION: tyvars mismatch
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< d0p       # 1 p:bool
+< f1!!      # 2 p|->p
+< b2 1 0fun # ty3 (bool->bool)->bool
+< b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+< c!=       # 3 = on bool->bool
+< e3!2      # 4 (p|->p)=
+< e0!2      # 5 (p|->p)=(p|->p)
+< d0q       # 6 q:bool
+< e1 0!     # 7 q=
+< e0!#      # 8 q=((p|->p)=(p|->p))
+< C!q
+< c0q       # 9 constant q:bool
+< e1 0!     # 10 q=
+< e0!5      # 11 q=((p|->p)=(p|->p))
+< t!        # thm0
+< d0r       # 12 r:bool
+< e1 0!     # 13 r=
+< e0!9      # 14 r=q
+< f1 C E    # 15 r|->r=q
+< e0!9      # 16 (r|->r=q)q
+< X!
+< t!        # thm1
+< A0 F!]ind]ABS]REP] # typedef collision
+./holtrace-verify
+> line 28: colliding tyapp name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 28: type name ind already used
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< d0p       # 1 p:bool
+< f1!!      # 2 p|->p
+< b2 1 0fun # ty3 (bool->bool)->bool
+< b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+< c!=       # 3 = on bool->bool
+< e3!2      # 4 (p|->p)=
+< e0!2      # 5 (p|->p)=(p|->p)
+< d0q       # 6 q:bool
+< e1 0!     # 7 q=
+< e0!#      # 8 q=((p|->p)=(p|->p))
+< C!q
+< c0q       # 9 constant q:bool
+< e1 0!     # 10 q=
+< e0!5      # 11 q=((p|->p)=(p|->p))
+< t!        # thm0
+< d0r       # 12 r:bool
+< e1 0!     # 13 r=
+< e0!9      # 14 r=q
+< f1 C E    # 15 r|->r=q
+< e0!9      # 16 (r|->r=q)q
+< X!
+< t!        # thm1
+< A0 F!]ABSTYPE]=]REP] # const collision
+./holtrace-verify
+> line 28: const name =
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 28: constant name = already used
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< d0p       # 1 p:bool
+< f1!!      # 2 p|->p
+< b2 1 0fun # ty3 (bool->bool)->bool
+< b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+< c!=       # 3 = on bool->bool
+< e3!2      # 4 (p|->p)=
+< e0!2      # 5 (p|->p)=(p|->p)
+< d0q       # 6 q:bool
+< e1 0!     # 7 q=
+< e0!#      # 8 q=((p|->p)=(p|->p))
+< C!q
+< c0q       # 9 constant q:bool
+< e1 0!     # 10 q=
+< e0!5      # 11 q=((p|->p)=(p|->p))
+< t!        # thm0
+< d0r       # 12 r:bool
+< e1 0!     # 13 r=
+< e0!9      # 14 r=q
+< f1 C E    # 15 r|->r=q
+< e0!9      # 16 (r|->r=q)q
+< X!
+< t!        # thm1
+< A0 F!]ABSTYPE]q]REP] # const collision
+./holtrace-verify
+> line 28: colliding const name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 28: constant name q already used
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< d0p       # 1 p:bool
+< f1!!      # 2 p|->p
+< b2 1 0fun # ty3 (bool->bool)->bool
+< b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+< c!=       # 3 = on bool->bool
+< e3!2      # 4 (p|->p)=
+< e0!2      # 5 (p|->p)=(p|->p)
+< d0q       # 6 q:bool
+< e1 0!     # 7 q=
+< e0!#      # 8 q=((p|->p)=(p|->p))
+< C!q
+< c0q       # 9 constant q:bool
+< e1 0!     # 10 q=
+< e0!5      # 11 q=((p|->p)=(p|->p))
+< t!        # thm0
+< d0r       # 12 r:bool
+< e1 0!     # 13 r=
+< e0!9      # 14 r=q
+< f1 C E    # 15 r|->r=q
+< e0!9      # 16 (r|->r=q)q
+< X!
+< t!        # thm1
+< A0 F!]ABSTYPE]ABS]=] # const collision
+./holtrace-verify
+> line 28: const name =
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 28: constant name = already used
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< d0p       # 1 p:bool
+< f1!!      # 2 p|->p
+< b2 1 0fun # ty3 (bool->bool)->bool
+< b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+< c!=       # 3 = on bool->bool
+< e3!2      # 4 (p|->p)=
+< e0!2      # 5 (p|->p)=(p|->p)
+< d0q       # 6 q:bool
+< e1 0!     # 7 q=
+< e0!#      # 8 q=((p|->p)=(p|->p))
+< C!q
+< c0q       # 9 constant q:bool
+< e1 0!     # 10 q=
+< e0!5      # 11 q=((p|->p)=(p|->p))
+< t!        # thm0
+< d0r       # 12 r:bool
+< e1 0!     # 13 r=
+< e0!9      # 14 r=q
+< f1 C E    # 15 r|->r=q
+< e0!9      # 16 (r|->r=q)q
+< X!
+< t!        # thm1
+< A0 F!]ABSTYPE]ABS]q] # const collision
+./holtrace-verify
+> line 28: colliding const name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 28: constant name q already used
+failure 1
+
+< HOLTrace 1
+< b0bool    # ty0 bool
+< b2!!fun   # ty1 bool->bool
+< b2@!fun   # ty2 bool->bool->bool
+< c!=       # 0 =:bool->bool->bool
+< d0p       # 1 p:bool
+< f1!!      # 2 p|->p
+< b2 1 0fun # ty3 (bool->bool)->bool
+< b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+< c!=       # 3 = on bool->bool
+< e3!2      # 4 (p|->p)=
+< e0!2      # 5 (p|->p)=(p|->p)
+< d0q       # 6 q:bool
+< e1 0!     # 7 q=
+< e0!#      # 8 q=((p|->p)=(p|->p))
+< C!q
+< c0q       # 9 constant q:bool
+< e1 0!     # 10 q=
+< e0!5      # 11 q=((p|->p)=(p|->p))
+< t!        # thm0
+< d0r       # 12 r:bool
+< e1 0!     # 13 r=
+< e0!9      # 14 r=q
+< f1 C E    # 15 r|->r=q
+< e0!9      # 16 (r|->r=q)q
+< X!
+< t!        # thm1
+< A0 F!]ABSTYPE]ABS]ABS] # const collision
+./holtrace-verify
+> line 28: colliding const name
+failure 100
+./holtrace-verify-simple
+> ...
+> Exception: line 28: constant name ABS already used
+failure 1

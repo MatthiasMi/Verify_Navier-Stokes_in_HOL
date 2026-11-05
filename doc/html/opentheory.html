@@ -1,0 +1,133 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style type="text/css">
+html{overflow-y:scroll;background-color:#505050}
+body{font-family:"Noto Sans","Droid Sans","DejaVu Sans","Arial",sans-serif;line-height:1.5}
+tt,code{background-color:#f0f0f0;font-family:"Noto Sans Mono","Droid Sans Mono","DejaVu Sans Mono","Courier New",monospace,sans-serif;font-size:1em;}
+pre{margin-left:3em}
+p,ul,ol,blockquote,pre{font-size:1.0em;line-height:1.6}
+li p{font-size:1.0em}
+blockquote p{font-size:1.0em}
+h1{font-size:1.5em}
+h2{font-size:1.3em}
+h3{font-size:1.0em}
+h1 a{text-decoration:none}
+table{border-collapse:collapse}
+th,td{border:1px solid black}
+table a{text-decoration:none}
+table tr{font-size:1.0em;line-height:1.6em}
+table tr{font-size:1.0em;line-height:1.5}
+tbody tr:nth-child(12n+1){background-color:#f0ffff}
+tbody tr:nth-child(12n+2){background-color:#f0ffff}
+tbody tr:nth-child(12n+3){background-color:#f0ffff}
+tbody tr:nth-child(12n+4){background-color:#f0ffff}
+tbody tr:nth-child(12n+5){background-color:#f0ffff}
+tbody tr:nth-child(12n+6){background-color:#f0ffff}
+tbody tr:nth-child(12n+7){background-color:#fffff0}
+tbody tr:nth-child(12n+8){background-color:#fffff0}
+tbody tr:nth-child(12n+9){background-color:#fffff0}
+tbody tr:nth-child(12n+10){background-color:#fffff0}
+tbody tr:nth-child(12n+11){background-color:#fffff0}
+tbody tr:nth-child(12n+12){background-color:#fffff0}
+
+#headline{display:block;margin:0;padding:0;color:#ffffff;background-color:#505050}
+#headline .text{font-weight:bold;font-size:1.0em}
+#headline input{display:none}
+#nav ul{margin:0;padding:0}
+#nav li{list-style-type:none;margin:0;padding:0}
+.navtop{padding-bottom:0.5em;font-weight:bold;font-size:1.0em}
+.navtop{background-color:#505050;color:#ffffff}
+#nav .here{background-color:#505050;color:#ffffff}
+#nav .away{background-color:#505050;color:#ffffff}
+#nav .away a{text-decoration:none;display:block;color:#ffffff}
+#nav .away a:hover,.away a:active{text-decoration:underline}
+#hidemenu{visibility:hidden;display:none;overflow:hidden;position:fixed;top:0;left:0;height:100%;width:100%}
+
+.main{padding:5px}
+.main{background-color:#ffffff}
+.pagetitle{font-size:1.4em;font-weight:bold}
+@media only screen and (min-width:512px) {
+  .navtop{padding-top:5px}
+  #headline{top:0;margin:0;width:160px;height:100%;position:fixed;overflow:auto}
+  #headline .noselect{display:none}
+  #headline #nav{visibility:visible;display:block;width:auto;height:auto}
+  .main{margin-left:170px}
+  #headline #hidemenu{visibility:hidden}
+}
+@media not screen and (min-width:512px) {
+  #headline .noselect{-webkit-user-select:none;-ms-user-select:none;user-select:none;}
+  #headline #nav #navbot{visibility:hidden;position:fixed;top:0;left:-70%;z-index:2;transition:0.2s;margin:0;padding:0}
+  #headline input:checked ~ #nav #navbot{height:100%;position:fixed;top:0;left:0;visibility:visible;display:block;box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;vertical-align:center;font-size:1.0em;width:70%;overflow:auto}
+  #headline input:checked ~ #hidemenu{visibility:visible;display:block;background:black;opacity:0.3;z-index:1}
+}
+</style>
+<title>
+HOLTrace: OpenTheory</title>
+</head>
+<body>
+<label id=headline>
+<input type=checkbox />
+<nav id=nav>
+<div class=navtop>
+<span class=noselect>≡</span>
+HOLTrace</div>
+<ul id=navbot>
+<li class=away><a href=index.html>Intro</a>
+</li><li class=away><a href=download.html>Download</a>
+</li><li class=away><a href=install.html>Install</a>
+</li><li class=away><a href=test.html>Test</a>
+</li><li class=away><a href=save.html>Save</a>
+</li><li class=away><a href=prune.html>Prune</a>
+</li><li class=away><a href=verify.html>Verify</a>
+</li><li class=away><a href=tex.html>TeX</a>
+</li><li class=away><a href=ml.html>ML REPL</a>
+</li><li class=away><a href=prooftrace.html>ProofTrace</a>
+</li><li class=here>OpenTheory
+</li><li class=away><a href=format.html>Format</a>
+</li><li class=away><a href=license.html>License</a>
+</li><li class=away><a href=bib.html>Literature</a>
+</li></ul></nav>
+<div id=hidemenu></div>
+</label>
+<div class=main>
+<div class=pagetitle>HOLTrace: OpenTheory</div>
+<p><a href="https://joe.leslie-hurd.com/opentheory/">OpenTheory</a> from Joe Hurd
+is an existing library of traces
+originally obtained from HOL Light, HOL4, and ProofPower.
+One way to generate HOLTrace files is by
+(1) downloading traces from the OpenTheory library and
+(2) using <code>ot2holtrace</code> from the HOLTrace package
+to convert traces from OpenTheory format to HOLTrace format.</p>
+<p>The traces currently produced by <code>ot2holtrace</code>
+from the OpenTheory library
+will be rejected by <code>holtrace_restore</code> since they rely on different axioms and definitions
+from the normal HOL Light axioms and definitions,
+but will be accepted by <code>holtrace_restore_allownew</code>.</p>
+<h2>Obtaining traces in OpenTheory format</h2>
+<p>If you install the <code>opentheory</code>
+<a href="https://joe.leslie-hurd.com/software/opentheory/download.html">tool</a>
+and run</p>
+<pre><code>opentheory install base
+</code></pre>
+<p>then <code>$HOME/.opentheory/packages</code> will contain
+various subdirectories such as <code>base-1.221</code>.</p>
+<p>Internally,
+these subdirectories contain traces
+split across "article" (<code>.art</code>) files.
+Article dependencies are specified by "theory" (<code>.thy</code>) files.</p>
+<h2>Converting OpenTheory traces to HOLTrace format</h2>
+<p>To use <code>ot2holtrace</code>:</p>
+<pre><code>./ot2holtrace $HOME/.opentheory/packages base &gt; base.50
+</code></pre>
+<p>This tool is written in Python.
+On <a href="install.html"><code>rome1</code></a>,
+running <code>ot2holtrace</code> for <code>base</code> takes 111 seconds and 421MB RAM,
+and converts 13.6MB of OpenTheory article files
+into a 7.3MB HOLTrace file.</p><hr><font size=1><b>Version:</b>
+This is version 2025.06.29 of the "OpenTheory" web page.
+</font>
+</div>
+</body>
+</html>

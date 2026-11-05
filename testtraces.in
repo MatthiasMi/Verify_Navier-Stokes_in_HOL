@@ -1,0 +1,1708 @@
+# ===== misc
+
+a	tab # bad character
+
+u # bad tag
+
+# ===== tyvar
+
+a # not enough args
+
+aA # ok
+
+a?328 # ok
+
+# ===== tyapp
+
+b # not enough args
+
+bx # non-numeric
+
+b1 # not enough args
+
+b0 # not enough args
+
+b100000000000 # check handling of big numbers
+
+b200000000000 # check handling of big numbers
+
+b400000000000 # check handling of big numbers
+
+b800000000000 # check handling of big numbers
+
+bG00000000000 # check handling of big numbers
+
+b1000000000000 # check handling of big numbers
+
+b2000000000000 # check handling of big numbers
+
+b4000000000000 # check handling of big numbers
+
+b8000000000000 # check handling of big numbers
+
+bG000000000000 # check handling of big numbers
+
+bbool # non-numeric
+
+b1bool # missing number
+
+b!bool # out of range
+
+b-1bool # out of range
+
+b-0bool # out of range
+
+b0bool # ok
+
+b00bool # ok, leading zeros allowed
+
+b0ind # ok
+
+b0undef # undefined type
+
+b0bool
+b!bool # arg count must be numeric
+
+b0bool
+b1!bool # too many args for bool
+
+b0fun # not enough args for fun
+
+b0bool
+b!!fun # missing number
+
+b0bool
+b2!@fun # out of range
+
+b0bool
+b2!!fun # ok
+
+b0bool
+b2 0 0fun # ok
+
+b0bool
+b2 0 0 fun # ok
+
+b2 0 0 fun # out of range
+
+b2 0 1 fun # out of range
+
+b2 1 1 fun # out of range
+
+b0bool
+b2 0 1 fun # out of range
+
+b0bool
+b2!!fun
+b2!@fun # ok
+
+# ===== const
+
+c # not enough args
+
+cx # non-numeric
+
+b0bool
+c! # not enough args
+
+b0bool
+c!p # undefined constant
+
+b0bool
+c!= # wrong type for =
+
+b0bool
+b2!!fun
+b2@!fun
+c!= # ok
+
+# ===== var
+
+d # not enough args
+
+dx # non-numeric
+
+b0bool
+d! # not enough args
+
+b0bool
+d!p # ok
+
+b0bool
+d!pq # ok
+
+# ===== comb (eval)
+
+e # not enough args
+
+ex # non-numeric
+
+e! # out of range, and not enough args
+
+b0bool
+d!p
+e! # not enough args
+
+b0bool
+d!p
+e!! # not enough args
+
+b0bool
+d!p
+e!!!! # extra arg
+
+b0bool
+d!p
+e!!! # wrong type
+
+b0bool
+d!p
+b2!!fun
+d!f
+e!!@ # wrong type
+
+b0bool
+d!p
+b2!!fun
+d!f
+e@!@ # ok
+
+b0bool
+d!p
+b0bool
+b2!!fun
+d!f
+e@!@ # ok with duplicated bool
+
+b0bool
+d!p
+b0bool
+b2!!fun
+d!f
+e#!@ # ok with duplicated bool
+
+# ===== abs (mapsto)
+
+f # not enough args
+
+fx # non-numeric
+
+b0bool
+d!p
+d!q
+b2!!fun
+f@!@! # extra arg
+
+b0bool
+b2!!fun
+b2@!fun
+c!=
+f!!! # non-variable (and other issues)
+
+b0bool
+d!p
+d!q
+b2!!fun
+f@!@ # wrong type
+
+b0bool
+d!p
+d!q
+b2!!fun
+f!!@ # ok
+
+# ===== theorem (see inferences for more tests)
+
+t # not enough args
+
+tx # non-numeric
+
+b0bool
+d!p
+t! # missing inference
+
+# ===== new_axiom
+
+X # not enough args
+
+Xx # non-numeric
+
+b0bool
+d!p
+X!x # extra arg
+
+b0bool
+d!p
+X!
+t # missing conclusion
+
+b0bool
+d!p
+X!
+t! # ok
+
+b0bool
+d!p
+X!
+d!p
+t! # ok
+
+b0bool
+d!p
+X!
+b0bool
+d!p
+t! # ok
+
+b0bool
+d!p
+X!
+b0bool
+d!q
+t! # name mismatch
+
+b0bool
+d!p
+X!
+b0ind
+d!p
+t! # type mismatch
+
+b0bool
+b2!!fun
+d@p
+f!!!
+X! # non-bool
+
+# ===== ASSUME
+
+U # not enough args
+
+Ux # non-numeric
+
+b0bool
+d!p
+U!x # extra arg
+
+b0bool
+d!p
+U!
+tx # non-numeric
+
+b0bool
+d!p
+U!
+t!! # ok
+
+b0bool
+b2!!fun
+d@p
+f!!!
+U! # non-bool
+
+# ===== REFL
+
+R # not enough args
+
+Rx # non-numeric
+
+b0bool
+d!p
+R!x # extra arg
+
+b0bool
+d!p
+R!
+t! # wrong theorem statement
+
+b0bool
+d!p
+R!
+b2!!fun
+b2@!fun
+c!=
+e1!@
+e0!#
+t!
+/!peqp
+t!
+/!peqpcopy # ok
+
+b0bool
+d!p
+R!
+b2!!fun
+b2@!fun
+c!=
+e1!@
+e0!#
+t!! # extra hypothesis
+
+# ===== BETA
+
+B # non-bool
+
+Bx # non-numeric
+
+b0bool
+d!p
+B! # non-eval
+
+b0bool
+d!p
+b2!!fun
+d!f
+e@!@
+B! # eval but not of mapsto
+
+b0bool
+d!p
+d!q
+b2!!fun
+f!@!
+e0!1
+B! # variable mismatch
+
+b0bool
+d!p
+d!q
+b2!!fun
+f!@!
+e0!0
+B!x # extra arg
+
+b0bool
+d!p
+d!q
+b2!!fun
+f!@!
+e0!0
+B!
+b2@!fun
+c!=
+e1!@
+e0!0
+t! # wrong theorem statement
+
+b0bool
+d!p
+d!q
+b2!!fun
+f!@!
+e0!0
+B!
+b2@!fun
+c!=
+e1!@
+e0!1
+t! # ok
+
+# ===== TRANS
+
+V # not enough args
+
+Vx # non-numeric
+
+b0bool
+d!p
+X!
+t!
+V!!x # extra arg
+
+b0bool
+d!p
+X!
+t!
+V!! # first (and second) conclusion not equality
+
+b0bool
+b2!!fun
+b2@!fun
+c!=
+d0p
+d0q
+e1 0 1
+e0!2
+X!
+t!
+X1
+t1
+V@! # second conclusion not equality
+
+b0bool
+b2!!fun
+b2@!fun
+c!=
+d0p
+d0q
+d0r
+e1 0 1
+e0!2
+X!
+t!
+e1 0 2
+e0!3
+X!
+t!
+V!@ # mismatch
+
+b0bool
+b2!!fun
+b2@!fun
+c!=
+d0p
+d0q
+d0r
+e1 0 1
+e0!2
+X!
+t!
+e1 0 2
+e0!3
+X!
+t!
+V@!
+e1 0 1
+e0!3
+t! # ok
+
+b0bool
+b2!!fun
+b2@!fun
+c!=
+d0p
+d0q
+d0r
+e1 0 1
+e0!2
+X!
+t!
+e1 0 2
+e0!3
+X!
+t!
+V@!
+e1 0 1
+e0!3
+t!! # wrong number of hypotheses
+
+# ===== MK_COMB
+
+E # not enough args
+
+Ex # non-numeric
+
+b0bool
+d!p
+X!
+t!
+E!!x # extra arg
+
+b0bool
+d!p
+X!
+t!
+E!! # first (and second) conclusion not equality
+
+b0bool
+b2!!fun
+b2@!fun
+c!=
+d0p
+d0q
+e1 0 1
+e0!2
+X!
+t!
+X1
+t1
+E@! # second conclusion not equality
+
+b0bool
+b2!!fun
+b2@!fun
+d1f
+d1g
+b2 1 0fun
+b2 1!fun
+c!=
+e@!#
+e0!#
+X!
+t!
+E!! # mismatch
+
+b0bool
+b2!!fun
+b2@!fun
+c!=
+d0p
+d0q
+e1 0 1
+e0!2
+X!
+t!
+d1f
+d1g
+b2 1 0fun
+b2 1!fun
+c!=
+e@!#
+e0!#
+X!
+t!
+E@! # first equality is not of functions
+
+b0bool
+b2!!fun
+b2@!fun
+c!=
+d0p
+d0q
+e1 0 1
+e0!2
+X!
+t!
+d1f
+d1g
+b2 1 0fun
+b2 1!fun
+c!=
+e@!#
+e0!#
+X!
+t!
+E!@
+e0 5 1
+e0 6 2
+e1 0@
+e0!@
+t! # ok
+
+# ===== EQ_MP
+
+P # not enough args
+
+Px # non-numeric
+
+b0bool
+d!p
+X!
+t!
+P!!x # extra arg
+
+b0bool
+d!p
+X!
+t!
+P!! # first conclusion non-equality
+
+b0bool
+b2!!fun
+b2@!fun
+c!=
+d0p
+d0q
+e1 0 1
+e0!2
+X!
+t!
+X2
+t2
+P@! # mismatch
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+d0q    # 2 q:bool
+e1 0 1 # 3 p =
+e0!2   # 4 p = q
+X!
+t!
+X1
+t1
+P@!
+t2 # ok
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+f1!!   # 2 p|->p
+d0q    # 3 q:bool
+f1!!   # 4 q|->q
+d0r    # 5 r:bool
+f1!!   # 6 r|->r
+d0x    # 7 x:bool
+e0 2 7 # 8 (p|->p)x
+e0 4 7 # 9 (q|->q)x
+e0 6 7 # 10 (r|->r)x
+X!
+t!     # thm0 (r|->r)x
+e1 0 8 # 11 (p|->p)x = 
+e0!9   # 12 (p|->p)x = (q|->q)x
+X!
+t!     # thm1 (p|->p)x = (q|->q)x
+P!@
+t9     # ok thm2 (q|->q)x
+
+# ===== DEDUCT_ANTISYM_RULE
+
+Z # not enough args
+
+Zx # non-numeric
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+f1!!   # 2 p|->p
+d0q    # 3 q:bool
+f1!!   # 4 q|->q
+d0r    # 5 r:bool
+f1!!   # 6 r|->r
+d0x    # 7 x:bool
+e0 2 7 # 8 (p|->p)x
+e0 4 7 # 9 (q|->q)x
+e0 6 7 # 10 (r|->r)x
+X!
+t!     # thm0 (r|->r)x
+e1 0 8 # 11 (p|->p)x = 
+e0!9   # 12 (p|->p)x = (q|->q)x
+X!
+t!     # thm1 (p|->p)x = (q|->q)x
+U8
+t8 8   # thm2 (p|->p)x entails (p|->p)x
+P1 2
+t8 9   # thm3 (p|->p)x entails (q|->q)x
+Z0 3
+e1 0 A
+e0!9
+t!     # (r|->r)x = (q|->q)x
+Z3 3
+e1 0 9
+e0!9
+t!     # ok (q|->q)x = (q|->q)x
+
+# ===== ABS
+
+F # not enough args
+
+Fx # non-numeric
+
+b0bool
+d0p
+X!
+t!
+F!! # non-equation
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+d0q    # 2 q:bool
+e1 0 1 # 3 p =
+e0!2   # 4 p = q
+X!
+t!
+F0!x # extra arg
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+d0q    # 2 q:bool
+e1 0 1 # 3 p =
+e0!2   # 4 p = q
+X!
+t!     # thm0 p = q
+F0! # non-variable
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+d0q    # 2 q:bool
+e1 0 1 # 3 p =
+e0!2   # 4 p = q
+X!
+t!     # thm0 p = q
+d0v    # 5 v:bool
+F5!
+f1 5 1 # 6 v|->p
+f1 5 2 # 7 v|->q
+b2 1 0fun
+b2 1!fun
+c!=    # 8 =:(bool->bool)->(bool->bool)->bool
+e3!6   # 9 (v|->p) = 
+e0!7   # 10 (v|->p) = (v|->q)
+t! # ok
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+d0q    # 2 q:bool
+e1 0 1 # 3 p =
+e0!2   # 4 p = q
+U!
+t!!    # thm0 p = q entails p = q
+F1! # bad, p free in hypothesis
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+d0q    # 2 q:bool
+e1 0 1 # 3 p =
+e0!2   # 4 p = q
+U!
+t!!    # thm0 p = q entails p = q
+F2! # bad, q free in hypothesis
+
+# ===== INST
+
+S # not enough args
+
+Sx # non-numeric
+
+b0bool
+d0p    # 0 p:bool
+U!
+t!!    # thm0: p entails p
+S!
+t0 0 # ok
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+U!
+t!!    # thm0: p entails p
+S!x # non-numeric arg
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+U!
+t!!    # thm0: p entails p
+S!0x # non-numeric arg
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+U!
+t!!    # thm0: p entails p
+S!0 # odd number of args
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+U!
+t!!    # thm0: p entails p
+S!0 1 # non-variable
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+U!
+t!!    # thm0: p entails p
+S!1 0 # mismatch
+
+b0bool
+b2!!fun
+b2@!fun
+d0p    # 0 p:bool
+d0q    # 1 q:bool
+U!
+t!!    # thm0: q entails q
+S!1 0
+t0 0   # ok thm1: p entails p
+
+b0bool
+b2!!fun
+b2@!fun
+d0p    # 0 p:bool
+d0q    # 1 q:bool
+U!
+t!!    # thm0: q entails q
+S!1 0 0 # odd number of args
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+U!
+t!!    # thm0: p entails p
+d0q    # 2 q:bool
+d0r    # 3 r:bool
+e1 0 2 # 4 q =
+e0!3   # 5 q = r
+S!1 5
+t5 5   # ok thm1: q = r entails q = r
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+d0q    # 2 q:bool
+d0r    # 3 r:bool
+e1 0 2 # 4 q =
+e0!3   # 5 q = r
+U!
+t!!    # thm0: q = r entails q = r
+S!2 1
+e1 0 1 # 6 p =
+e0!3   # 7 p = r
+t!!    # thm1: p = r entails p = r
+S!1 3 3 1
+e1 0 3 # 8 r =
+e0!1   # 9 r = p
+t!!    # thm2: r = p entails r = p
+S!3 2 1 3
+t5 5   # thm3: q = r entails q = r
+S@1 3 3 2
+t5 5   # thm4: q = r entails q = r
+S#1 3 3 2 1 2 # second 1->... is ignored
+t5 5   # ok thm5: q = r entails q = r
+
+b0bool
+b2!!fun
+d0p    # 0 p:bool
+d0q    # 1 q:bool
+f1 0 0 # 2 p|->p
+e0!1   # 3 (p|->p)q
+X!
+t!     # thm0 (p|->p)q
+S!0 0  # p to p
+t!     # thm1 (p|->p)q
+S!0 1  # p to q
+t!     # thm2 (p|->p)q
+S!1 1  # q to q
+t!     # thm3 (p|->p)q
+S!1 0  # q to p
+e0 2 0 # 4 (p|->p)p
+t!     # ok thm4 (p|->p)p
+
+b0bool
+b2!!fun
+d0p    # 0 p:bool
+d0q    # 1 q:bool
+f1 0 0 # 2 p|->p
+e0!1   # 3 (p|->p)q
+X!
+t!     # thm0 (p|->p)q
+f1 1 0 # 4 q|->p
+e0!1   # 5 (q|->p)q
+S!0 0  # p to p
+t!     # mismatch
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+d0q    # 2 q:bool
+e1 0 1 # 3 p =
+e0!2   # 4 p = q
+f1 1 4 # 5 p|->p=q
+f2 2 5 # 6 q|->p|->p=q
+R!     # (q|->p|->p=q)=(q|->p|->p=q)
+b2!0fun # (bool->bool->bool)->bool
+b2@!fun # (bool->bool->bool)->(bool->bool->bool)->bool
+c!=    # 7 = on bool->bool->bool
+e@!@   # 8 (q|->p|->p=q) =
+e0!#   # 9 (q|->p|->p=q) = (q|->p|->p=q)
+t!     # thm0
+S!1 2 2 1  # p to q, q to p
+t!     # ok
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+d0q    # 2 q:bool
+e1 0 1 # 3 p =
+e0!2   # 4 p = q
+f1 1!  # 5 p|->p=q
+d0r    # 6 r:bool
+e0@!   # 7 (p|->p=q)r
+X!
+t!     # thm0 (p|->p=q)r
+S!1 1  # p to p
+t!     # thm1 (p|->p=q)r
+S!2 2  # q to q
+t!     # thm2 (p|->p=q)r
+S!6 6  # r to r
+t!     # thm3 (p|->p=q)r
+S!1 2  # p to q
+t!     # thm4 (p|->p=q)r
+S!1 6  # p to r
+t!     # thm5 (p|->p=q)r
+S!2 6  # q to r
+e0 3 6 # 8 p = r
+f1 1!  # 9 p|->p=r
+e0!6   # 10 (p|->p=r)r
+t!     # thm6 (p|->p=r)r
+S0 2 1 # q to p in thm0
+d0p'   # 11 p':bool
+e1 0!  # 12 p' =
+e0!1   # 13 p' = p
+f1#!   # 14 p'|->p'=p
+e0!6   # 15 (p'|->p'=p)r
+t!     # thm7 (p'|->p'=p)r
+S0 6 1 # r to p in thm0
+e0 5 1 # 16 (p|->p=q)p
+t!
+S0 6 2 # r to q in thm0
+e0 5 2 # 17 (p|->p=q)q
+t! # ok
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+d0p'   # 2 p':bool
+d0p''  # 3 p'':bool
+d0p''' # 4 p''':bool
+e1 0 2 # 5 p'=
+e0!1   # 6 p'=p
+e1 0 3 # 7 p''=
+e0!6   # 8 p''=(p'=p)
+f1 1!  # 9 p|->p''=(p'=p)
+e0!4   # 10 (p|->p''=(p'=p))(p''')
+X!
+t!     # thm0: (p|->p''=(p'=p))(p''')
+S!1 1
+t!     # thm1: (p|->p''=(p'=p))(p''')
+S!2 2
+t!     # thm2: (p|->p''=(p'=p))(p''')
+S!3 3
+t!     # thm3: (p|->p''=(p'=p))(p''')
+S!4 4
+t!     # thm4: (p|->p''=(p'=p))(p''')
+S!2 1 # p' to p
+e1 0 1 # 11 p=
+e0!2   # 12 p=p'
+e0 7!  # 13 p''=(p=p')
+f1 2!  # 14 p'|->p''=(p=p')
+e0!4   # 15 (p'|->p''=(p=p'))(p''')
+t!     # thm5: (p'|->p''=(p=p'))(p''')
+S0 3 1 # p'' to p in thm0
+e0 5 3 # 16 p'=p''
+e0 B!  # 17 p=(p'=p'')
+f1 3!  # 18 p''|->p=(p'=p'')
+e0!4   # 19 (p''|->p=(p'=p''))(p''')
+t!     # thm6: (p''|->p=(p'=p''))(p''')
+S0 2 C # p' to p=p' in thm0
+e1 0 C # 20 (p=p')=
+e0!4   # 21 (p=p')=p'''
+e0 7!  # 22 p''=((p=p')=p''')
+f1 4!  # 23 p'''|->p''=((p=p')=p''')
+e0!4   # 24 (p'''|->p''=((p=p')=p'''))(p''')
+t! # ok
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+U!
+t!!    # thm0: p entails p
+d0q    # 2 q:bool
+U!
+t!!    # thm1: q entails q
+Z@!
+e1 0 1 # 3 p=
+e0!2   # 4 p=q
+t1 2 4 # thm2: p,q entail p=q
+f1 1 1 # 5 p|->p
+d0r    # 6 r:bool
+e0@!   # 7 (p|->p)r
+f1 2 2 # 8 q|->q
+e0!#   # 9 (q|->q)r
+S!1 7 2 9
+e1 0 7 # 10 (p|->p)r=
+e0!9   # 11 (p|->p)r=(q|->q)r
+t7!    # thm3: (p|->p)r entails (p|->p)r=(q|->q)r
+S2 2 7 1 9
+e1 0 9
+e0!7
+t9! # ok thm4: (q|->q)r entails (q|->q)r=(p|->p)r
+
+# ===== INST_TYPE
+
+T # not enough args
+
+Tx # non-numeric
+
+b0bool
+d0p    # 0 p:bool
+U!
+t!!    # thm0: p entails p
+T!
+t0 0 # ok
+
+b0bool
+d0p    # 0 p:bool
+U!
+t!!    # thm0: p entails p
+aA
+T!x # non-numeric arg
+
+b0bool
+d0p    # 0 p:bool
+U!
+t!!    # thm0: p entails p
+aA
+T!!x # non-numeric arg
+
+b0bool
+d0p    # 0 p:bool
+U!
+t!!    # thm0: p entails p
+aA
+T!! # odd number of args
+
+b0bool
+d0p    # 0 p:bool
+U!
+t!!    # thm0: p entails p
+aA
+T!!!
+t!! # ok
+
+b0bool
+d0p    # 0 p:bool
+U!
+t!!    # thm0: p entails p
+aA
+T!!@ # ok
+
+b0bool
+d0p    # 0 p:bool
+U!
+t!!    # thm0: p entails p
+aA
+T!@! # non-tyvar
+
+b0bool    # ty0 bool
+aA        # ty1 A
+b2!@fun   # ty2 A->bool
+b2@!fun   # ty3 A->A->bool
+c!=       # 0 =:A->A->bool
+d1p       # 1 p:A
+e2 0!     # 2 (p:A)=
+e0!@      # 3 (p:A)=p
+X!
+t!        # thm0 (p:A)=p
+T!1 1
+t!        # thm1 (p:A)=p
+T!1 0
+d0p       # 4 p:bool
+b2 0 0fun # ty4 bool->bool
+b2 0!fun  # ty5 bool->bool->bool
+c!=       # 5 =:bool->bool
+e4!4      # 6 (p:bool)=
+e0!4      # 7 (p:bool)=p
+t!        # ok thm2 (p:bool)=p
+
+b0bool    # ty0 bool
+aA        # ty1 A
+d!p       # 0 p:A
+aB        # ty2 B
+d!p       # 1 p:B
+b2 1 2fun # ty3 A->B
+f3 0 1    # 2 (p:A)|->(p:B)
+b2 3 0fun # ty4 (A->B)->bool
+b2 3 4fun # ty5 (A->B)->(A->B)->bool
+c!=       # 3 = on A->B
+e4!2      # 4 ((p:A)|->(p:B))=
+e0!2      # 5 ((p:A)|->(p:B))=((p:A)|->(p:B))
+X!
+t!        # thm0 ((p:A)|->(p:B))=((p:A)|->(p:B))
+T!1 1
+t!
+T!2 2
+t!
+T!1 1 2 2
+t!
+T!2 2 1 1
+t!
+T!1 1 1 2
+t!
+T!1 2
+b2 2 2fun # ty6 B->B
+b2!0fun   # ty7 (B->B)->bool
+b2@!fun   # ty8 (B->B)->(B->B)->bool
+c!=       # 6 = on B->B
+d2p'      # 7 p':B
+f#!1      # 8 (p':B)|->(p:B)
+e@#!      # 9 ((p':B)|->(p:B))=
+e0!@      # 10 ((p':B)|->(p:B))=((p':B)|->(p:B))
+t!
+T0 2 1
+b2 1 1fun # ty9 A->A
+b2!0fun   # ty10 (A->A)->bool
+b2@!fun   # ty11 (A->A)->(A->A)->bool
+c!=       # 6 = on A->A
+d1p'      # 7 p':A
+f#!0      # 8 (p':A)|->(p:A)
+e@#!      # 9 ((p':A)|->(p:A))=
+e0!@      # 10 ((p':A)|->(p:A))=((p':A)|->(p:A))
+t! # ok
+
+# ===== new_basic_definition
+
+C # not enough args
+
+Cx # non-numeric
+
+b0bool
+d!p
+C! # not enough args
+
+b0bool
+d!p
+C!x # not equality
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+e1 0!  # 2 p=
+e0!@   # 3 p=p
+e1 0!  # 4 (p=p)=
+e0!@   # 5 (p=p)=(p=p)
+C!x # not variable on left
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+e1 0!  # 2 p=
+e0!@   # 3 p=p
+C!x # wrong variable name on left
+
+b0bool
+b2!!fun
+b2@!fun
+c!=    # 0 =:bool->bool->bool
+d0p    # 1 p:bool
+e1 0!  # 2 p=
+e0!@   # 3 p=p
+C!p # free variables on right
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+aA        # ty3 A
+b2!0fun   # ty4 A->bool
+b2@!fun   # ty5 A->A->bool
+c!=       # 1 =:A->A->bool
+d3p       # 2 p:A
+b2 3 3fun # ty6 A->A
+f!!!      # 3 p|->p
+b2 6 0fun # ty7 (A->A)->bool
+b2 6!fun  # ty8 (A->A)->(A->A)->bool
+c!=       # 4 = on A->A
+e7!3      # 5 (p|->p)=
+e0!3      # 6 (p|->p)=(p|->p)
+d0q       # 7 q:bool
+e1 0!     # 8 q=
+e0!#      # 9 q=((p|->p)=(p|->p))
+C!q # missing tyvars
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+b0bool    # ty3 bool
+b2!0fun   # ty4 bool->bool
+b2@!fun   # ty5 bool->bool->bool
+c!=       # 1 =:bool->bool->bool
+d3p       # 2 p:bool
+b2 3 3fun # ty6 bool->bool
+f!!!      # 3 p|->p
+b2 6 0fun # ty7 (bool->bool)->bool
+b2 6!fun  # ty8 (bool->bool)->(bool->bool)->bool
+c!=       # 4 = on bool->bool
+e7!3      # 5 (p|->p)=
+e0!3      # 6 (p|->p)=(p|->p)
+d0q       # 7 q:bool
+e1 0!     # 8 q=
+e0!#      # 9 q=((p|->p)=(p|->p))
+C!q
+c0q       # 10 constant q:bool
+e1 0!
+e0!6
+t! # ok
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+b0bool    # ty3 bool
+b2!0fun   # ty4 bool->bool
+b2@!fun   # ty5 bool->bool->bool
+c!=       # 1 =:bool->bool->bool
+d3p       # 2 p:bool
+b2 3 3fun # ty6 bool->bool
+f!!!      # 3 p|->p
+b2 6 0fun # ty7 (bool->bool)->bool
+b2 6!fun  # ty8 (bool->bool)->(bool->bool)->bool
+c!=       # 4 = on bool->bool
+e7!3      # 5 (p|->p)=
+e0!3      # 6 (p|->p)=(p|->p)
+d0q       # 7 q:bool
+e1 0!     # 8 q=
+e0!#      # 9 q=((p|->p)=(p|->p))
+C!q
+C!q # name used already
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+b0bool    # ty3 bool
+b2!0fun   # ty4 bool->bool
+b2@!fun   # ty5 bool->bool->bool
+c!=       # 1 =:bool->bool->bool
+d3p       # 2 p:bool
+b2 3 3fun # ty6 bool->bool
+f!!!      # 3 p|->p
+b2 6 0fun # ty7 (bool->bool)->bool
+b2 6!fun  # ty8 (bool->bool)->(bool->bool)->bool
+c!=       # 4 = on bool->bool
+e7!3      # 5 (p|->p)=
+e0!3      # 6 (p|->p)=(p|->p)
+d0=       # 7 =:bool
+e1 0!     # 8 ==
+e0!#      # 9 ==((p|->p)=(p|->p))
+C!=
+
+# ===== new_basic_type_definition
+
+A # not enough args
+
+Ax # non-numeric
+
+D # not enough args
+
+Dx # non-numeric
+
+b0bool
+d!p
+R!
+A! # not enough args
+
+b0bool
+d!p
+R!
+A!! # not enough args
+
+b0bool
+d!p
+R!
+b2!!fun
+b2@!fun
+c!=
+e1!@
+e0!#
+t!
+A!!! # not enough args
+
+b0bool
+d!p
+R!
+b2!!fun
+b2@!fun
+c!=
+e1!@
+e0!#
+t!
+A!!!foo # misformatted
+
+b0bool
+d!p
+R!
+b2!!fun
+b2@!fun
+c!=
+e1!@
+e0!#
+t!
+A!!!foo]]]] # misformatted
+
+b0bool
+d!p
+R!
+b2!!fun
+b2@!fun
+c!=
+e1!@
+e0!#
+t!
+A!!!]]]]foo # misformatted
+
+b0bool
+d!p
+U!
+t!!
+A!!!]]]] # hypotheses
+
+b0bool
+d!p
+X!
+t!
+A!!!]]]] # non-eval
+
+b0bool
+d!p
+R!
+b2!!fun
+b2@!fun
+c!=
+e1!@
+e0!#
+t!
+A!!!]]]] # repprop mismatch
+
+b0bool
+d!p
+R!
+b2!!fun
+b2@!fun
+c!=
+e1!@
+e0!#
+t!
+A!2!]]]] # reptype mismatch
+
+b0bool
+d!p
+R!
+b2!!fun
+b2@!fun
+c!=
+e1!@
+e0!#
+t!
+A#2!]]]] # free variables in repprop
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+d0p       # 1 p:bool
+f1!!      # 2 p|->p
+b2 1 0fun # ty3 (bool->bool)->bool
+b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+c!=       # 3 = on bool->bool
+e3!2      # 4 (p|->p)=
+e0!2      # 5 (p|->p)=(p|->p)
+d0q       # 6 q:bool
+e1 0!     # 7 q=
+e0!#      # 8 q=((p|->p)=(p|->p))
+C!q
+c0q       # 9 constant q:bool
+e1 0!     # 10 q=
+e0!5      # 11 q=((p|->p)=(p|->p))
+t!        # thm0
+d0r       # 12 r:bool
+e1 0!     # 13 r=
+e0!9      # 14 r=q
+f1 C E    # 15 r|->r=q
+e0!9      # 16 (r|->r=q)q
+X!
+t!        # thm1
+A0 F!]ABSTYPE]ABS]REP]
+b0 ABSTYPE # ty5 ABSTYPE
+b2!0fun   # ty6 ABSTYPE->bool
+b2 0@fun  # ty7 bool->ABSTYPE
+c!ABS     # 17 ABS:bool->ABSTYPE
+c@REP     # 18 REP:ABSTYPE->bool
+d5a       # 19 a:ABSTYPE
+e0@!      # 20 REP(a)
+e5$!      # 21 ABS(REP(a))
+b2 5 0fun # ty8 ABSTYPE->bool
+b2 5!fun  # ty9 ABSTYPE->ABSTYPE->bool
+c!=       # 22 = on ABSTYPE
+e8!@      # 23 ABS(REP(a))=
+e0!J      # 24 ABS(REP(a))=a
+t!
+D!
+d0r       # 25 r:bool
+e0 F!     # 26 (r|->r=q)r
+e1 0!     # 27 (r|->r=q)r=
+e5 H#     # 28 ABS(r)
+e0 I!     # 29 REP(ABS(r))
+e1 0!     # 30 REP(ABS(r))=
+e0!^      # 31 REP(ABS(r))=r
+e0%!      # 32 (r|->r=q)r=(REP(ABS(r))=r)
+t! # ok
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+d0p       # 1 p:bool
+f1!!      # 2 p|->p
+b2 1 0fun # ty3 (bool->bool)->bool
+b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+c!=       # 3 = on bool->bool
+e3!2      # 4 (p|->p)=
+e0!2      # 5 (p|->p)=(p|->p)
+d0q       # 6 q:bool
+e1 0!     # 7 q=
+e0!#      # 8 q=((p|->p)=(p|->p))
+C!q
+c0q       # 9 constant q:bool
+e1 0!     # 10 q=
+e0!5      # 11 q=((p|->p)=(p|->p))
+t!        # thm0
+d0r       # 12 r:bool
+e1 0!     # 13 r=
+e0!9      # 14 r=q
+f1 C E    # 15 r|->r=q
+e0!9      # 16 (r|->r=q)q
+X!
+t!        # thm1
+A0 F!]ABSTYPE]ABS]REP]
+b0 ABSTYPE # ty5 ABSTYPE
+b2!0fun   # ty6 ABSTYPE->bool
+b2 0@fun  # ty7 bool->ABSTYPE
+c!ABS     # 17 ABS:bool->ABSTYPE
+c@REP     # 18 REP:ABSTYPE->bool
+d5a       # 19 a:ABSTYPE
+e0@!      # 20 REP(a)
+e5$!      # 21 ABS(REP(a))
+b2 5 0fun # ty8 ABSTYPE->bool
+b2 5!fun  # ty9 ABSTYPE->ABSTYPE->bool
+c!=       # 22 = on ABSTYPE
+e8!@      # 23 ABS(REP(a))=
+e0!J      # 24 ABS(REP(a))=a
+t!
+D!x # extra arg
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+d0p       # 1 p:bool
+f1!!      # 2 p|->p
+b2 1 0fun # ty3 (bool->bool)->bool
+b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+c!=       # 3 = on bool->bool
+e3!2      # 4 (p|->p)=
+e0!2      # 5 (p|->p)=(p|->p)
+d0q       # 6 q:bool
+e1 0!     # 7 q=
+e0!#      # 8 q=((p|->p)=(p|->p))
+C!q
+c0q       # 9 constant q:bool
+e1 0!     # 10 q=
+e0!5      # 11 q=((p|->p)=(p|->p))
+t!        # thm0
+d0r       # 12 r:bool
+e1 0!     # 13 r=
+e0!9      # 14 r=q
+f1 C E    # 15 r|->r=q
+e0!9      # 16 (r|->r=q)q
+X!
+t!        # thm1
+A0 F!]ABSTYPE]ABS]REP]X] # extra tyvar
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+d0p       # 1 p:bool
+f1!!      # 2 p|->p
+b2 1 0fun # ty3 (bool->bool)->bool
+b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+c!=       # 3 = on bool->bool
+e3!2      # 4 (p|->p)=
+e0!2      # 5 (p|->p)=(p|->p)
+d0q       # 6 q:bool
+e1 0!     # 7 q=
+e0!#      # 8 q=((p|->p)=(p|->p))
+C!q
+c0q       # 9 constant q:bool
+e1 0!     # 10 q=
+e0!5      # 11 q=((p|->p)=(p|->p))
+t!        # thm0
+d0r       # 12 r:bool
+e1 0!     # 13 r=
+e0!9      # 14 r=q
+f1 C E    # 15 r|->r=q
+e0!9      # 16 (r|->r=q)q
+X!
+t!        # thm1
+A0 F!]ind]ABS]REP] # typedef collision
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+d0p       # 1 p:bool
+f1!!      # 2 p|->p
+b2 1 0fun # ty3 (bool->bool)->bool
+b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+c!=       # 3 = on bool->bool
+e3!2      # 4 (p|->p)=
+e0!2      # 5 (p|->p)=(p|->p)
+d0q       # 6 q:bool
+e1 0!     # 7 q=
+e0!#      # 8 q=((p|->p)=(p|->p))
+C!q
+c0q       # 9 constant q:bool
+e1 0!     # 10 q=
+e0!5      # 11 q=((p|->p)=(p|->p))
+t!        # thm0
+d0r       # 12 r:bool
+e1 0!     # 13 r=
+e0!9      # 14 r=q
+f1 C E    # 15 r|->r=q
+e0!9      # 16 (r|->r=q)q
+X!
+t!        # thm1
+A0 F!]ABSTYPE]=]REP] # const collision
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+d0p       # 1 p:bool
+f1!!      # 2 p|->p
+b2 1 0fun # ty3 (bool->bool)->bool
+b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+c!=       # 3 = on bool->bool
+e3!2      # 4 (p|->p)=
+e0!2      # 5 (p|->p)=(p|->p)
+d0q       # 6 q:bool
+e1 0!     # 7 q=
+e0!#      # 8 q=((p|->p)=(p|->p))
+C!q
+c0q       # 9 constant q:bool
+e1 0!     # 10 q=
+e0!5      # 11 q=((p|->p)=(p|->p))
+t!        # thm0
+d0r       # 12 r:bool
+e1 0!     # 13 r=
+e0!9      # 14 r=q
+f1 C E    # 15 r|->r=q
+e0!9      # 16 (r|->r=q)q
+X!
+t!        # thm1
+A0 F!]ABSTYPE]q]REP] # const collision
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+d0p       # 1 p:bool
+f1!!      # 2 p|->p
+b2 1 0fun # ty3 (bool->bool)->bool
+b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+c!=       # 3 = on bool->bool
+e3!2      # 4 (p|->p)=
+e0!2      # 5 (p|->p)=(p|->p)
+d0q       # 6 q:bool
+e1 0!     # 7 q=
+e0!#      # 8 q=((p|->p)=(p|->p))
+C!q
+c0q       # 9 constant q:bool
+e1 0!     # 10 q=
+e0!5      # 11 q=((p|->p)=(p|->p))
+t!        # thm0
+d0r       # 12 r:bool
+e1 0!     # 13 r=
+e0!9      # 14 r=q
+f1 C E    # 15 r|->r=q
+e0!9      # 16 (r|->r=q)q
+X!
+t!        # thm1
+A0 F!]ABSTYPE]ABS]=] # const collision
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+d0p       # 1 p:bool
+f1!!      # 2 p|->p
+b2 1 0fun # ty3 (bool->bool)->bool
+b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+c!=       # 3 = on bool->bool
+e3!2      # 4 (p|->p)=
+e0!2      # 5 (p|->p)=(p|->p)
+d0q       # 6 q:bool
+e1 0!     # 7 q=
+e0!#      # 8 q=((p|->p)=(p|->p))
+C!q
+c0q       # 9 constant q:bool
+e1 0!     # 10 q=
+e0!5      # 11 q=((p|->p)=(p|->p))
+t!        # thm0
+d0r       # 12 r:bool
+e1 0!     # 13 r=
+e0!9      # 14 r=q
+f1 C E    # 15 r|->r=q
+e0!9      # 16 (r|->r=q)q
+X!
+t!        # thm1
+A0 F!]ABSTYPE]ABS]q] # const collision
+
+b0bool    # ty0 bool
+b2!!fun   # ty1 bool->bool
+b2@!fun   # ty2 bool->bool->bool
+c!=       # 0 =:bool->bool->bool
+d0p       # 1 p:bool
+f1!!      # 2 p|->p
+b2 1 0fun # ty3 (bool->bool)->bool
+b2 1!fun  # ty4 (bool->bool)->(bool->bool)->bool
+c!=       # 3 = on bool->bool
+e3!2      # 4 (p|->p)=
+e0!2      # 5 (p|->p)=(p|->p)
+d0q       # 6 q:bool
+e1 0!     # 7 q=
+e0!#      # 8 q=((p|->p)=(p|->p))
+C!q
+c0q       # 9 constant q:bool
+e1 0!     # 10 q=
+e0!5      # 11 q=((p|->p)=(p|->p))
+t!        # thm0
+d0r       # 12 r:bool
+e1 0!     # 13 r=
+e0!9      # 14 r=q
+f1 C E    # 15 r|->r=q
+e0!9      # 16 (r|->r=q)q
+X!
+t!        # thm1
+A0 F!]ABSTYPE]ABS]ABS] # const collision
+

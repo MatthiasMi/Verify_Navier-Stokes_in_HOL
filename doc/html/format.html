@@ -1,0 +1,725 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style type="text/css">
+html{overflow-y:scroll;background-color:#505050}
+body{font-family:"Noto Sans","Droid Sans","DejaVu Sans","Arial",sans-serif;line-height:1.5}
+tt,code{background-color:#f0f0f0;font-family:"Noto Sans Mono","Droid Sans Mono","DejaVu Sans Mono","Courier New",monospace,sans-serif;font-size:1em;}
+pre{margin-left:3em}
+p,ul,ol,blockquote,pre{font-size:1.0em;line-height:1.6}
+li p{font-size:1.0em}
+blockquote p{font-size:1.0em}
+h1{font-size:1.5em}
+h2{font-size:1.3em}
+h3{font-size:1.0em}
+h1 a{text-decoration:none}
+table{border-collapse:collapse}
+th,td{border:1px solid black}
+table a{text-decoration:none}
+table tr{font-size:1.0em;line-height:1.6em}
+table tr{font-size:1.0em;line-height:1.5}
+tbody tr:nth-child(12n+1){background-color:#f0ffff}
+tbody tr:nth-child(12n+2){background-color:#f0ffff}
+tbody tr:nth-child(12n+3){background-color:#f0ffff}
+tbody tr:nth-child(12n+4){background-color:#f0ffff}
+tbody tr:nth-child(12n+5){background-color:#f0ffff}
+tbody tr:nth-child(12n+6){background-color:#f0ffff}
+tbody tr:nth-child(12n+7){background-color:#fffff0}
+tbody tr:nth-child(12n+8){background-color:#fffff0}
+tbody tr:nth-child(12n+9){background-color:#fffff0}
+tbody tr:nth-child(12n+10){background-color:#fffff0}
+tbody tr:nth-child(12n+11){background-color:#fffff0}
+tbody tr:nth-child(12n+12){background-color:#fffff0}
+
+#headline{display:block;margin:0;padding:0;color:#ffffff;background-color:#505050}
+#headline .text{font-weight:bold;font-size:1.0em}
+#headline input{display:none}
+#nav ul{margin:0;padding:0}
+#nav li{list-style-type:none;margin:0;padding:0}
+.navtop{padding-bottom:0.5em;font-weight:bold;font-size:1.0em}
+.navtop{background-color:#505050;color:#ffffff}
+#nav .here{background-color:#505050;color:#ffffff}
+#nav .away{background-color:#505050;color:#ffffff}
+#nav .away a{text-decoration:none;display:block;color:#ffffff}
+#nav .away a:hover,.away a:active{text-decoration:underline}
+#hidemenu{visibility:hidden;display:none;overflow:hidden;position:fixed;top:0;left:0;height:100%;width:100%}
+
+.main{padding:5px}
+.main{background-color:#ffffff}
+.pagetitle{font-size:1.4em;font-weight:bold}
+@media only screen and (min-width:512px) {
+  .navtop{padding-top:5px}
+  #headline{top:0;margin:0;width:160px;height:100%;position:fixed;overflow:auto}
+  #headline .noselect{display:none}
+  #headline #nav{visibility:visible;display:block;width:auto;height:auto}
+  .main{margin-left:170px}
+  #headline #hidemenu{visibility:hidden}
+}
+@media not screen and (min-width:512px) {
+  #headline .noselect{-webkit-user-select:none;-ms-user-select:none;user-select:none;}
+  #headline #nav #navbot{visibility:hidden;position:fixed;top:0;left:-70%;z-index:2;transition:0.2s;margin:0;padding:0}
+  #headline input:checked ~ #nav #navbot{height:100%;position:fixed;top:0;left:0;visibility:visible;display:block;box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;vertical-align:center;font-size:1.0em;width:70%;overflow:auto}
+  #headline input:checked ~ #hidemenu{visibility:visible;display:block;background:black;opacity:0.3;z-index:1}
+}
+</style>
+<title>
+HOLTrace: Format</title>
+</head>
+<body>
+<label id=headline>
+<input type=checkbox />
+<nav id=nav>
+<div class=navtop>
+<span class=noselect>≡</span>
+HOLTrace</div>
+<ul id=navbot>
+<li class=away><a href=index.html>Intro</a>
+</li><li class=away><a href=download.html>Download</a>
+</li><li class=away><a href=install.html>Install</a>
+</li><li class=away><a href=test.html>Test</a>
+</li><li class=away><a href=save.html>Save</a>
+</li><li class=away><a href=prune.html>Prune</a>
+</li><li class=away><a href=verify.html>Verify</a>
+</li><li class=away><a href=tex.html>TeX</a>
+</li><li class=away><a href=ml.html>ML REPL</a>
+</li><li class=away><a href=prooftrace.html>ProofTrace</a>
+</li><li class=away><a href=opentheory.html>OpenTheory</a>
+</li><li class=here>Format
+</li><li class=away><a href=license.html>License</a>
+</li><li class=away><a href=bib.html>Literature</a>
+</li></ul></nav>
+<div id=hidemenu></div>
+</label>
+<div class=main>
+<div class=pagetitle>HOLTrace: Format</div>
+<p>A HOLTrace file records a sequence of HOL Light proofs and theorems.
+This document specifies version 1 of the file format.
+This document is aimed at implementors writing tools to read or write HOLTrace files.</p>
+<p>Files in HOLTrace format conventionally have filenames ending <code>.50</code>,
+although this is not required.</p>
+<p>This document allows multiletter italicized variable names.
+Concatenation here does not mean multiplication.</p>
+<h2>Overall structure</h2>
+<p>The file is a sequence of lines.
+Each line consists of
+printable ASCII characters (bytes 32 through 126)
+followed by LF (byte 10).
+There is always a terminating LF.
+This is a binary file format: LF does not mean CR LF.</p>
+<p>The first line is <code>HOLTrace 1</code> (followed by LF).
+Each subsequent line begins with a 1-character tag
+and continues with a sequence of zero or more arguments.
+Arguments are encoded nonnegative integers,
+except that some tags also have text as a final argument.</p>
+<p>Integers are encoded in a way
+that often appears negative or non-numeric.
+Specifically:</p>
+<ul>
+<li>
+<p>Each integer is encoded relative to an integer <em>n</em> defined below by the context.</p>
+</li>
+<li>
+<p>Integer arguments <em>n</em>−1 through <em>n</em>−10 are encoded as
+  the characters of <code>!@#$%^&amp;*()</code> respectively:
+  i.e., <code>!</code> means <em>n</em>−1, <code>@</code> means <em>n</em>−2, etc.</p>
+</li>
+<li>
+<p>An integer argument <em>i</em> ≥ <em>n</em>
+  is encoded as the uppercase base-32 representation of the integer <em>i</em>.
+  Lowercase is not accepted as a synonym for uppercase.</p>
+</li>
+<li>
+<p>An integer argument <em>i</em> ≤ <em>n</em>−11
+  is encoded as the uppercase base-32 representation of the negative integer <em>i</em>−<em>n</em>
+  (starting with a minus sign),
+  or as the uppercase base-32 representation of the integer <em>i</em>
+  if that has strictly fewer bytes.
+  Lowercase is again not accepted as a synonym for uppercase.</p>
+</li>
+</ul>
+<p>For example, for encodings relative to <em>n</em> = 10000:
+argument <code>0</code> means 0;
+<code>9</code> means 9;
+<code>A</code> means 10;
+<code>V</code> means 31;
+<code>10</code> means 32;
+<code>VV</code> means 1023;
+<code>100</code> means 1024;
+<code>8OG</code> means 8976;
+<code>-VV</code> means 8977;
+<code>-10</code> means 9968;
+<code>-V</code> means 9969;
+<code>-B</code> means 9989;
+<code>)</code> means 9990;
+<code>!</code> means 9999;
+<code>9OG</code> means 10000;
+<code>9OH</code> means 10001.</p>
+<p>Spaces between arguments are suppressed in the file:
+e.g., tag <code>b</code> with arguments <code>0</code> and <code>bool</code> is written as <code>b0bool</code>.
+Exception:
+if an encoded argument ends with one of the characters <code>0123456789ABCDEFGHIJKLMNOPQRSTUV</code>
+and the next encoded argument begins with one of those characters (or a space)
+then a space is inserted:
+e.g., tag <code>e</code> with arguments <code>17</code> and <code>14</code> is written <code>e17 14</code>.</p>
+<h2>Order</h2>
+<p>Some of the line definitions below
+say that a line refers to other lines in the file.
+Some references are via explicit arguments:
+for example, the line <code>b2!!fun</code> specifies a type
+by reference to the previously specified type.
+Some references are implicit:
+for example, a theorem is always proven by the most recent inference.</p>
+<p>These references must be to lines
+earlier in the file than the current line.
+In other words,
+circular references are prohibited,
+and lines must appear in topological order.</p>
+<p>A file writer normally deduplicates objects
+(for example, there is only one <code>b0bool</code> line),
+but a file reader does not rely on this.
+For example,
+correctly implementing the semantics of the <code>S</code> tag
+relies on recognizing whether various objects are equal.</p>
+<h2>Types</h2>
+<p>Each line with tag <code>a</code> or <code>b</code> is a "type line" specifying a type.
+Each type is assigned an identifying number (a "type ID") for future reference,
+counting from 0 upwards:
+the first type line specifies type 0, i.e., the type having type ID 0;
+the next type line specifies type 1;
+the next type line after that specifies type 2;
+etc.
+To track these references,
+the file reader mantains a type counter
+that starts at 0 and that increments by 1 immediately after each type line.
+(The file writer also does this.)</p>
+<p>Specifically, type lines have the following meanings:</p>
+<ul>
+<li>
+<p><code>a</code> <em>text</em>:
+  The type variable named <em>text</em>;
+  HOL Light's <code>Tyvar</code>(<em>text</em>).
+  For example, the line <code>aB</code> specifies a type variable named <code>B</code>;
+  the line <code>a?328</code> specifies a type variable named <code>?328</code>.</p>
+</li>
+<li>
+<p><code>b</code> <em>n</em> <em>a</em> ... <em>z</em> <em>text</em>:
+  The type named <em>text</em> with arguments <em>a</em>,...,<em>z</em>;
+  HOL Light's <code>Tyapp</code>(<em>text</em>,[<em>a</em>;...;<em>z</em>]).
+  The first argument <em>n</em> says the number of <em>a</em> through <em>z</em> arguments
+  (0 or more, not necessarily 26);
+  those arguments are type IDs specifying the <code>TyApp</code> arguments.
+  These type IDs are encoded relative to the current type ID,
+  so <code>!</code> refers to the most recent type line before this,
+  and <code>@</code> refers to the most recent type line before that.
+  The argument <em>n</em> is encoded relative to the integer <code>-1</code>
+  (so it never uses <code>!</code> etc.).</p>
+</li>
+</ul>
+<p>For example, the lines <code>b0bool</code> and <code>b2!!fun</code> and <code>b2@!fun</code>
+(in that order) specify types
+<code>bool</code> and <code>fun(bool,bool)</code> and <code>fun(bool,fun(bool,bool))</code>,
+i.e.,
+<code>bool</code> and <code>bool-&gt;bool</code> and <code>bool-&gt;bool-&gt;bool</code>.</p>
+<h2>Terms</h2>
+<p>Each line with tag <code>c</code> or <code>d</code> or <code>e</code> or <code>f</code> is a "term line" specifying a term.
+Each term is assigned an identifying number (a "term ID") for future reference,
+counting from 0 upwards:
+the first term line specifies term 0, i.e., the term having term ID 0;
+the next term line specifies term 1;
+the next term line after that specifies term 2;
+etc.
+To track these references,
+the file reader mantains a term counter
+that starts at 0 and that increments by 1 immediately after each term line.</p>
+<p>The term counter is separate from the type counter.
+For example,
+if the first five lines have tags <code>b</code>, <code>b</code>, <code>b</code>, <code>c</code>, and <code>d</code> respectively,
+then those lines specify type 0, type 1, type 2, term 0, and term 1 respectively.</p>
+<p>Specifically, term lines have the following meanings:</p>
+<ul>
+<li>
+<p><code>c</code> <em>type</em> <em>text</em>:
+  The constant named <em>text</em> whose type is ID <em>type</em>;
+  HOL Light's <code>Const</code>(<em>text</em>,<em>type</em>).
+  The encoding of <em>type</em> is relative to the type counter,
+  so <code>!</code> refers to the most recently specified type.
+  For example,
+  after the lines <code>b0bool</code> and <code>b2!!fun</code> and <code>b2@!fun</code> mentioned above,
+  the line <code>c!=</code> specifies a constant named <code>=</code>
+  of type <code>bool-&gt;bool-&gt;bool</code>.</p>
+</li>
+<li>
+<p><code>d</code> <em>type</em> <em>text</em>:
+  The variable named <em>text</em> whose type is ID <em>type</em>;
+  HOL Light's <code>Var</code>(<em>text</em>,<em>type</em>).
+  For example,
+  after the lines <code>b0bool</code> and <code>b2!!fun</code> and <code>b2@!fun</code> and <code>c!=</code> mentioned above,
+  the line <code>d#T</code> specifies a constant named <code>T</code> of type <code>bool</code>.</p>
+</li>
+<li>
+<p><code>e</code> <em>type</em> <em>fterm</em> <em>xterm</em>: 
+  The evaluation <em>fterm</em>(<em>xterm</em>);
+  HOL Light's <code>Comb</code>(<em>fterm</em>,<em>xterm</em>).
+  The <em>type</em> argument is a type ID for the type of the value.
+  The <em>fterm</em> and <em>xterm</em> arguments are term IDs
+  for, respectively, the function being evaluated
+  and the evaluation point.
+  These term IDs are encoded relative to the term counter,
+  so <code>!</code> refers to the most recently specified term before this line.
+  For example,
+  after the lines <code>c!=</code> and <code>d#T</code> mentioned above
+  specifying terms <code>=</code> and <code>T</code>,
+  the line <code>e@@!</code> specifies a term <code>Comb(=,T)</code>,
+  i.e. =(T),
+  meaning the value of the = function applied to T.
+  The first <code>@</code> in this example refers to the value type, namely <code>bool-&gt;bool</code>.</p>
+</li>
+<li>
+<p><code>f</code> <em>type</em> <em>vterm</em> <em>tterm</em>: 
+  The function <em>vterm</em> ↦ <em>tterm</em>;
+  HOL Light's <code>Abs</code>(<em>vterm</em>,<em>tterm</em>).
+  The <em>type</em> argument is a type ID for the type of the function.
+  The <em>vterm</em> and <em>tterm</em> arguments are term IDs
+  for, respectively, the function variable and the function output.
+  These term IDs are encoded relative to the term counter,
+  For example,
+  after <code>d0x</code> specifies a variable named <code>x</code> of type <code>bool</code>,
+  the line <code>f$!!</code> specifies the term <code>Abs(x,x)</code>,
+  i.e., x↦x,
+  meaning the function that maps x to x.
+  The <code>$</code> in this example refers to the function type, namely <code>bool-&gt;bool</code>.</p>
+</li>
+</ul>
+<h2>Theorems</h2>
+<p>Each line with tag <code>t</code> is a "theorem line" specifying a theorem.
+Each theorem is assigned an identifying number (a "theorem ID") for future reference,
+counting from 0 upwards:
+the first theorem line specifies theorem 0, i.e., the theorem having theorem ID 0;
+the next theorem line specifies theorem 1;
+the next theorem line after that specifies theorem 2;
+etc.
+To track these references,
+the file reader mantains a theorem counter
+that starts at 0 and that increments by 1 immediately after each theorem line.
+The theorem counter is separate from the term counter and the type counter.</p>
+<p>Specifically, theorem lines have the following meaning:</p>
+<ul>
+<li><code>t</code> <em>A</em> ... <em>Z</em> <em>conclusion</em>:
+   The theorem saying that <em>conclusion</em> follows
+   given hypotheses <em>A</em> through <em>Z</em>.
+   The arguments (for the hypotheses and the conclusion)
+   are term IDs encoded relative to the term counter.
+   There must be at least one argument.</li>
+</ul>
+<p>(Warning:
+Often the literature on logic says "sequent" rather than "theorem",
+reserving "theorem" for the case of no hypotheses,
+although the conclusion can still be a term of the form <code>P implies Q</code>.
+"Sequent" can also refer to a more general concept
+allowing a disjunction of any number of conclusions.)</p>
+<p>Some readers that check inferences
+expect the hypotheses of each theorem
+to be sorted in a particular order.
+The order is outside the scope of this document
+(but is connected to the reason for variables being labeled <code>d</code> instead of <code>v</code>).</p>
+<p>As a complete example of a theorem,
+here are annotations explaining
+the first lines with lowercase-letter tags in a trace of <code>hol.ml</code>:</p>
+<table>
+<thead>
+<tr>
+<th>line</th>
+<th style="text-align: right;">specifies</th>
+<th>as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>b0bool</code></td>
+<td style="text-align: right;">type 0</td>
+<td>type bool</td>
+</tr>
+<tr>
+<td><code>b2!!fun</code></td>
+<td style="text-align: right;">type 1</td>
+<td>type bool-&gt;bool</td>
+</tr>
+<tr>
+<td><code>b2@!fun</code></td>
+<td style="text-align: right;">type 2</td>
+<td>type bool-&gt;bool-&gt;bool</td>
+</tr>
+<tr>
+<td><code>c!=</code></td>
+<td style="text-align: right;">term 0</td>
+<td>constant = of type bool-&gt;bool-&gt;bool</td>
+</tr>
+<tr>
+<td><code>d#T</code></td>
+<td style="text-align: right;">term 1</td>
+<td>variable T of type bool</td>
+</tr>
+<tr>
+<td><code>e@@!</code></td>
+<td style="text-align: right;">term 2</td>
+<td>value =(T) of type bool</td>
+</tr>
+<tr>
+<td><code>b2@#fun</code></td>
+<td style="text-align: right;">type 3</td>
+<td>type (bool-&gt;bool)-&gt;bool</td>
+</tr>
+<tr>
+<td><code>b2#!fun</code></td>
+<td style="text-align: right;">type 4</td>
+<td>type (bool-&gt;bool)-&gt;(bool-&gt;bool)-&gt;bool</td>
+</tr>
+<tr>
+<td><code>c!=</code></td>
+<td style="text-align: right;">term 3</td>
+<td>constant = of type (bool-&gt;bool)-&gt;(bool-&gt;bool)-&gt;bool</td>
+</tr>
+<tr>
+<td><code>d%p</code></td>
+<td style="text-align: right;">term 4</td>
+<td>variable p of type bool</td>
+</tr>
+<tr>
+<td><code>f$!!</code></td>
+<td style="text-align: right;">term 5</td>
+<td>function p↦p of type bool-&gt;bool</td>
+</tr>
+<tr>
+<td><code>e@#!</code></td>
+<td style="text-align: right;">term 6</td>
+<td>value =(p↦p) of type (bool-&gt;bool)-&gt;bool</td>
+</tr>
+<tr>
+<td><code>e%!@</code></td>
+<td style="text-align: right;">term 7</td>
+<td>value =(p↦p)(p↦p) of type bool</td>
+</tr>
+<tr>
+<td><code>e%^!</code></td>
+<td style="text-align: right;">term 8</td>
+<td>value =(T)(=(p↦p)(p↦p)) of type bool</td>
+</tr>
+<tr>
+<td><code>c%T</code></td>
+<td style="text-align: right;">term 9</td>
+<td>constant T of type bool</td>
+</tr>
+<tr>
+<td><code>e$)!</code></td>
+<td style="text-align: right;">term 10</td>
+<td>value =(T) of type bool-&gt;bool</td>
+</tr>
+<tr>
+<td><code>e%!$</code></td>
+<td style="text-align: right;">term 11</td>
+<td>value =(T)(=(p↦p)(p↦p)) of type bool</td>
+</tr>
+<tr>
+<td><code>t!</code></td>
+<td style="text-align: right;">theorem 0</td>
+<td>theorem =(T)(=(p↦p)(p↦p))</td>
+</tr>
+</tbody>
+</table>
+<p>This theorem has no hypotheses.
+Its conclusion is that the constant
+T is equal to the equality of p↦p and p↦p,
+i.e., that
+T is true if and only if p↦p equals p↦p.</p>
+<h2>Theorem names</h2>
+<p>Lines with tag <code>/</code> assign names to theorems.
+Specifically, these lines have the following meaning:</p>
+<ul>
+<li><code>/</code> <em>th</em> <em>text</em>:
+  Theorem <em>th</em> has name <em>text</em>.
+  Here <em>th</em> is a theorem ID,
+  encoded relative to the theorem counter.
+  For example, <code>/!T_DEF</code>
+  says that the most recent theorem is named <code>T_DEF</code>.
+  The name <em>text</em> is required to be nonempty.</li>
+</ul>
+<p>A theorem can have multiple names,
+but multiple theorems cannot have the same name.</p>
+<h2>Inferences</h2>
+<p>Each line with an uppercase letter tag
+(within the list of tags below)
+is an "inference line" specifying an inference
+(a way to prove a theorem).
+Each inference is assigned an identifying number (an "inference ID") for future reference,
+counting from 0 upwards:
+the first inference line defines inference 0, i.e., the inference having inference ID 0;
+the next inference line defines inference 1;
+the next inference line after that defines inference 2;
+etc.
+To track these references,
+the file reader mantains an inference counter
+that starts at 0 and that increments by 1 immediately after each inference line.
+The inference counter is separate from the theorem counter, the term counter, and the type counter.</p>
+<p>For example,
+in a trace of <code>hol.ml</code>,
+the first lines include the lines shown above (<code>b0bool</code> etc.) with lowercase-letter tags,
+and also one inference line that proves theorem 0,
+namely a <code>C!T</code> line right before the <code>c%T</code> line.</p>
+<p>Some readers of HOLTrace files ignore inferences;
+inference lines can be simply removed from the file without affecting those readers.
+However, file readers that check inferences expect each theorem
+to be preceded in the file by at least one inference
+and to be proven specifically by the last of those inferences.
+(Non-inference lines can appear between that inference and the theorem.
+There can also be further inferences that prove the same theorem in different ways.)</p>
+<p>Except for the arguments listed as <em>text</em> below,
+all arguments on inference lines are nonnegative integers.
+Arguments labeled <em>type</em> are type IDs, encoded relative to the current type counter;
+arguments labeled <em>term</em> are term IDs, encoded relative to the current term counter;
+arguments labeled <em>th</em> (or <em>TH</em>) are theorem IDs, encoded relative to the current theorem counter.
+For example, <code>!</code> refers to the most recently specified type or term or theorem respectively.</p>
+<p>Ten of the inference tags are HOL Light's ten primitive inference rules:</p>
+<ul>
+<li>
+<p><code>B</code> <em>term</em>:
+  HOL Light's <code>BETA</code> primitive inference rule.
+  The input <em>term</em>
+  is required to have the form (<em>x</em>↦<em>y</em>)(<em>x</em>),
+  where <em>x</em> is a variable and <em>y</em> is a term.
+  This rule generates the conclusion (<em>x</em>↦<em>y</em>)(<em>x</em>) = <em>y</em> with no hypotheses.</p>
+</li>
+<li>
+<p><code>E</code> <em>th</em> <em>TH</em>:
+  HOL Light's <code>MK_COMB</code> primitive inference rule.
+  There are two input theorems <em>th</em> and <em>TH</em>,
+  which are required to have conclusions of the form <em>a</em> = <em>b</em> and <em>C</em> = <em>D</em>
+  respectively,
+  with <em>a</em> having suitable type to be evaluated at <em>C</em>.
+  This rule generates the conclusion <em>a</em>(<em>C</em>) = <em>b</em>(<em>D</em>)
+  from a merged list of hypotheses of the input theorems.</p>
+</li>
+<li>
+<p><code>F</code> <em>term</em> <em>th</em>:
+  HOL Light's <code>ABS</code> primitive inference rule.
+  The input theorem <em>th</em>
+  is required to have a conclusion of the form <em>a</em> = <em>b</em>.
+  The input <em>term</em>
+  is required to be a variable that does not appear free in any of the hypotheses of <em>th</em>.
+  This rule generates the conclusion
+  (<em>term</em>↦<em>a</em>) = (<em>term</em>↦<em>b</em>)
+  from the same hypotheses as <em>th</em>.</p>
+</li>
+<li>
+<p><code>P</code> <em>th</em> <em>TH</em>:
+  HOL Light's <code>EQ_MP</code> primitive inference rule.
+  There are two input theorems <em>th</em> and <em>TH</em>,
+  which are required to have conclusions of the form <em>a</em> = <em>b</em> and <em>A</em>
+  respectively,
+  where <em>a</em> is the same as <em>A</em> modulo renaming of bound variables.
+  This rule generates the conclusion <em>b</em>
+  from a merged list of hypotheses of the input theorems.</p>
+</li>
+<li>
+<p><code>R</code> <em>term</em>:
+  HOL Light's <code>REFL</code> primitive inference rule.
+  This rule generates the conclusion <em>term</em> = <em>term</em> with no hypotheses.</p>
+</li>
+<li>
+<p><code>S</code> <em>th</em> <em>oldterm</em> <em>newterm</em> ... <em>oldterm</em> <em>newterm</em>:
+  HOL Light's <code>INST</code> primitive inference rule
+  for term substitution in the hypotheses and conclusion of theorem <em>th</em>,
+  including renaming of bound variables if necessary.
+  Beware that
+  replacing term variable <em>v</em> with <em>t</em> and replacing term variable <em>w</em> with <em>u</em>
+  is written in HOLTrace format with arguments <em>v</em> <em>t</em> <em>w</em> <em>u</em>,
+  whereas the <code>INST</code> input is [<em>t</em>,<em>v</em>;<em>u</em>,<em>w</em>].
+  There can be 0 substitutions, although this is not useful. </p>
+</li>
+<li>
+<p><code>T</code> <em>th</em> <em>oldtype</em> <em>newtype</em> ... <em>oldtype</em> <em>newtype</em>:
+  HOL Light's <code>INST_TYPE</code> primitive inference rule
+  for type substitution in the hypotheses and conclusion of theorem <em>th</em>,
+  including renaming of bound variables if necessary.
+  Beware that
+  replacing type variable <em>v</em> with <em>t</em> and replacing type variable <em>w</em> with <em>u</em>
+  is written in HOLTrace format with arguments <em>v</em> <em>t</em> <em>w</em> <em>u</em>,
+  whereas the <code>INST_TYPE</code> input is [<em>t</em>,<em>v</em>;<em>u</em>,<em>w</em>].
+  There can be 0 substitutions, although this is not useful. </p>
+</li>
+<li>
+<p><code>U</code> <em>term</em>:
+  HOL Light's <code>ASSUME</code> primitive inference rule.
+  The input <em>term</em> is required to have type <code>bool</code>.
+  This rule generates the conclusion <em>term</em> from the hypothesis <em>term</em>.</p>
+</li>
+<li>
+<p><code>V</code> <em>th</em> <em>TH</em>:
+  HOL Light's <code>TRANS</code> primitive inference rule.
+  There are two input theorems <em>th</em> and <em>TH</em>,
+  which are required to have conclusions of the form <em>a</em> = <em>b</em> and <em>B</em> = <em>C</em>
+  respectively,
+  where <em>b</em> is the same as <em>B</em> modulo renaming of bound variables.
+  This rule generates the conclusion <em>a</em> = <em>C</em>
+  from a merged list of hypotheses of the input theorems.</p>
+</li>
+<li>
+<p><code>Z</code> <em>th</em> <em>TH</em>:
+    HOL Light's <code>DEDUCT_ANTISYM_RULE</code> primitive inference rule.
+    This rule generates the conclusion <em>p</em> = <em>P</em>,
+    where <em>p</em> and <em>P</em> are the conclusions of <em>th</em> and <em>TH</em> respectively,
+    from a merged list of the following hypotheses:</p>
+<ol>
+<li>hypotheses of <em>th</em> that are different from <em>P</em>
+   modulo renaming of bound variables;</li>
+<li>hypotheses of <em>TH</em> that are different from <em>p</em>
+   modulo renaming of bound variables.</li>
+</ol>
+<p>For example,
+given theorems drawing the conclusion <em>p</em> from the hypothesis <em>P</em>
+and drawing the conclusion <em>P</em> from the hypothesis <em>p</em>,
+this rule generates the conclusion <em>p</em> = <em>P</em> with no hypotheses.</p>
+</li>
+</ul>
+<p>The other inference tags are as follows:</p>
+<ul>
+<li>
+<p><code>X</code> <em>term</em>:
+    HOL Light's <code>new_axiom</code> (reported as <code>AXIOM</code> by ProofTrace).
+    This rule generates the conclusion <em>term</em> from no hypotheses,
+    and adds <em>term</em> to a list of axioms.</p>
+</li>
+<li>
+<p><code>C</code> <em>term</em> <em>text</em>:
+    HOL Light's <code>new_basic_definition</code>
+    (reported as <code>DEFINITION</code> by ProofTrace).
+    The input <em>term</em>
+    is required to have the form <em>c</em> = <em>t</em>,
+    where <em>c</em> is a variable named <em>text</em> of some type.
+    (HOL Light's <code>new_basic_definition</code> takes a variable as input;
+    beware that ProofTrace reports the output, which has a constant.)
+    The term <em>t</em> is required to have no free variables,
+    and to have no type variables except for type variables appearing in <em>c</em>.
+    This rule generates the conclusion <em>C</em> = <em>t</em> with no hypotheses,
+    where <em>C</em> is a constant named <em>text</em>.</p>
+</li>
+<li>
+<p><code>A</code> <em>reptype</em> <em>repterm</em> <em>th</em> <em>text</em>:
+    HOL Light's <code>new_basic_type_definition</code>
+    (reported as <code>TYPE_DEFINITION</code> by ProofTrace).
+    The input theorem <em>th</em>
+    is required to have a conclusion of the form <em>repterm</em>(<em>x</em>) with no hypotheses,
+    where <em>x</em> is some term of type <em>reptype</em>.
+    The final argument <em>text</em> is required to have
+    the form
+    <code>]</code><em>abstypename</em><code>]</code><em>absname</em><code>]</code><em>repname</em><code>]</code><em>tyvar0</em><code>]</code><em>tyvar1</em><code>]</code>...<code>]</code>,
+    starting and ending with <code>]</code>.
+    This produces a conclusion (with no hypotheses) of the form
+    <em>absname</em>(<em>repname</em>(<code>a</code>)) = <code>a</code> where</p>
+<ul>
+<li><code>a</code> is a variable of type <em>reptype</em>,</li>
+<li><em>absname</em> maps from <em>abstypename</em>(<em>tyvar0</em>,<em>tyvar1</em>,...) to <em>reptype</em>,
+  and</li>
+<li><em>repname</em> maps the other way.</li>
+</ul>
+<p>The names <em>tyvar0</em>, <em>tyvar1</em>, etc. must be the output of the following:
+take all type variables appearing in <em>repterm</em>,
+sort in lexicographic order,
+and remove duplicates.</p>
+<p>Each <code>A</code> line is assigned another counter, the "typedef ID",
+which starts at 0 and is incremented after each <code>A</code> line.</p>
+</li>
+<li>
+<p><code>D</code> <em>typedef</em>:
+    the other theorem from HOL Light's <code>new_basic_type_definition</code>
+    (this theorem is reported on a second <code>TYPE_DEFINITION</code> line by ProofTrace).
+    Here <em>typedef</em> is a typedef ID of an <code>A</code> line.
+    This produces a conclusion (with no hypotheses) of the form
+    <em>repterm</em>(<code>r</code>) = (<em>repname</em>(<em>absname</em>(<code>r</code>)) = <code>r</code>) where <code>r</code> is a variable.</p>
+</li>
+</ul>
+<p>As an example of a type definition,
+take type variables <code>A</code> and <code>B</code>,
+and consider the set of functions
+of the form (<em>a</em> ↦ <em>b</em> ↦ <em>a</em>=<em>x</em> and <em>b</em>=<em>y</em>)
+having type <code>A-&gt;B-&gt;bool</code>,
+where <em>x</em> and <em>y</em> range over <code>A</code> and <code>B</code> respectively.
+Types in HOL Light are nonempty,
+so this set is nonempty.
+Assume that the most recent theorem proves that this set is nonempty;
+that the 430th term before now is this set,
+with type <code>(A-&gt;B-&gt;bool)-&gt;bool</code>;
+and that type 49 is the type <code>A-&gt;B-&gt;bool</code>.
+Then the inference
+<code>A1H-DE!]prod]ABS_prod]REP_prod]A]B]</code>
+returns the theorem <code>ABS_prod(REP_prod(a)) = a</code>,
+where <code>ABS_prod</code> maps <code>A-&gt;B-&gt;bool</code> to a new type <code>prod(A,B)</code>
+and <code>REP_prod</code> maps the other way.</p>
+<p>All constant names must be distinct strings,
+where constant names mean the following:
+<code>=</code>;
+<code>@</code>;
+<em>text</em> in each <code>C</code> line;
+<em>absname</em> in each <code>A</code> line;
+<em>repname</em> in each <code>A</code> line.
+All type names must be distinct strings,
+where type names mean the following:
+<code>bool</code>;
+<code>fun</code>;
+<code>ind</code>;
+<em>abstypename</em> in each <code>A</code> line.</p>
+<h2>ProofTrace IDs</h2>
+<p>The tags <code>,</code> and <code>;</code>
+are used to enable exact regeneration of a ProofTrace file
+given an appropriate HOLTrace file.
+Exact regeneration means a byte-for-byte match.
+This often requires
+multiple copies of the same theorem
+and multiple proofs of the same theorem;
+ProofTrace has its own set of IDs distinguishing these.
+A file reader that handles ProofTrace-related tags
+maintains a "ProofTrace counter"
+that starts at 0 and that increments by 1 immediately after
+each line with <code>,</code> or <code>;</code> as a tag.
+The ProofTrace counter is separate from
+the other counters mentioned above.</p>
+<p>ProofTrace lines have the following meanings:</p>
+<ul>
+<li>
+<p><code>,</code> <em>newth</em> <em>inf</em> <em>ptth</em> <em>ptTH</em>:
+  The current ProofTrace ID includes inference <em>inf</em> deriving theorem <em>newth</em>.
+  Here <em>newth</em> is a theorem ID (encoded relative to the theorem counter);
+  <em>inf</em> is an inference ID (encoded relative to the inference counter);
+  <em>ptth</em> and <em>ptTH</em> are ProofTrace IDs (encoded relative to the ProofTrace counter)
+  for theorems matching the <em>th</em> and <em>TH</em> inputs to the inference rule.
+  The <em>ptTH</em> argument is omitted if the inference rule does not involve <em>TH</em>,
+  and the <em>ptth</em> argument is omitted if the inference rule does not involve <em>th</em>.
+  For example, the line <code>,!!</code> means that the current ProofTrace ID
+  includes the most recent inference deriving the most recent theorem,
+  via an inference rule not involving <em>TH</em> or <em>th</em>.</p>
+</li>
+<li>
+<p><code>;</code>:
+  No effect other than increasing the ProofTrace ID counter.
+  (ProofTrace IDs are mostly sequential starting from 0
+  but skip numbers on certain occasions.)</p>
+</li>
+</ul>
+<p>Outside the context of generating ProofTrace outputs
+(to check against ProofTrace or to interoperate with tools that expect ProofTrace format),
+lines with tag <code>,</code> (or <code>;</code>) are not useful and can be removed,
+typically saving more than half of the space in a HOLTrace file
+(and speeding up further processing).
+File readers not using ProofTrace tags also do not need the inference counter,
+although an "inference initialized" flag
+is useful for checking each theorem against the most recent inference.</p>
+<p>A ProofTrace-to-HOLTrace converter
+generates <code>/</code> before <code>,</code>
+when it sees an ID that has a theorem name.
+A HOLTrace-to-ProofTrace converter
+treats <code>/</code> as applying to the current ProofTrace ID.</p><hr><font size=1><b>Version:</b>
+This is version 2025.06.24 of the "Format" web page.
+</font>
+</div>
+</body>
+</html>

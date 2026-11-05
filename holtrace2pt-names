@@ -1,0 +1,3 @@
+#!/bin/sh
+./holtrace-worker names "$@" |
+env LANG=C sort -k4

@@ -1,0 +1,546 @@
+#!/usr/bin/env pypy3
+
+import sys
+sys.setrecursionlimit(1000000)
+import os
+
+# ===== inferences
+
+import type
+import term
+from trace import AXIOM,REFL,ASSUME,BETA,TRANS,MK_COMB,EQ_MP,DEDUCT_ANTISYM_RULE,ABS,INST,INST_TYPE,NEW_DEFINITION,TYPE_DEFINITION,NAME
+
+def BETA_CONV(t):
+  if not term.is_eval(t): reject('BETA_CONV: non-eval')
+  f,x = term.eval_funpoint(t)
+  if not term.is_mapsto(f): reject('BETA_CONV: non-mapsto')
+  v,y = term.mapsto_varout(f)
+  if x == v: return BETA(t)
+  return INST(BETA(term.eval(f,v)),((v,x),))
+
+def SYM(LR):
+  L,R = term.eq_split(LR[1])
+  eq = term.eval_fun(term.eval_fun(LR[1]))
+  # LR is: L = R; i.e., eq(L)(R)
+  LL = REFL(L) # L = L
+  eqeq = REFL(eq) # eq = eq
+  eqLR = MK_COMB(eqeq,LR) # eq(L) = eq(R)
+  LLRL = MK_COMB(eqLR,LL) # eq(L)(L) = eq(R)(L)
+  return EQ_MP(LLRL,LL) # eq(R)(L); i.e., R = L
+
+def PROVE_HYP(th,TH):
+  if any(term.alphaequivalent(th[1],h) for h in TH[0]):
+    return EQ_MP(DEDUCT_ANTISYM_RULE(th,TH),th)
+  return TH
+
+# prove h|-c
+# caller provides th alpha-equivalent to h|-c
+def ALPHA_THM(th,h,c):
+  if th[1] != c:
+    th = EQ_MP(TRANS(REFL(th[1]),REFL(c)),th)
+  for t in h:
+    if t in th[0]: continue
+    tt = ASSUME(t)
+    th = EQ_MP(DEDUCT_ANTISYM_RULE(tt,th),tt)
+  return th
+
+# ===== pretty-printing
+
+watch = False
+
+def format_type(x):
+  if type.is_var(x): return type.var_name(x)
+  app = type.app_name(x)
+  args = type.app_args(x)
+  args = ','.join(map(format_type,args))
+  return f'{app}({args})'
+
+def format_term(t):
+  if term.is_const(t): return term.const_name(t)
+  if term.is_var(t): return term.var_name(t)
+  if term.is_eval(t):
+    f,x = term.eval_funpoint(t)
+    return f'{format_term(f)}({format_term(x)})'
+  v,b = term.mapsto_varout(t)
+  return f'{format_term(v)}|->{format_term(b)}'
+
+def format_thm(th):
+  h,c = th
+  result = ','.join(format_term(t) for t in h)
+  result += '|-'
+  result += format_term(c)
+  return result
+
+def format_list(x):
+  return '['+','.join(format_obj(y) for y in x)+']'
+
+def format_obj(x):
+  if x[0] == 'num': return f'{x[1]}'
+  if x[0] == 'name': return f'"{x[1]}"'
+  if x[0] == 'const': return f'const("{x[1]}")'
+  if x[0] == 'typeop': return f'typeop("{x[1]}")'
+  if x[0] == 'type': return format_type(x[1])
+  if x[0] == 'term': return format_term(x[1])
+  if x[0] == 'var': return format_term(x[1])
+  if x[0] == 'thm': return format_thm(x[1])
+  if x[0] == 'list': return format_list(x[1])
+  raise Exception('format_obj')
+
+# ===== opentheory state
+
+ot_version = 5
+S = [] # stack
+D = {} # dictionary: int->obj
+T = set() # theorems
+
+def pop_obj(): return S.pop()
+def push_obj(x): S.append(x)
+
+def obj2num(x): assert x[0] == 'num'; return x[1]
+def obj2name(x): assert x[0] == 'name'; return x[1]
+def obj2const(x): assert x[0] == 'const'; return x[1]
+def obj2typeop(x): assert x[0] == 'typeop'; return x[1]
+def obj2type(x): assert x[0] == 'type'; return x[1]
+def obj2term(x): assert x[0] == 'term'; return x[1]
+def obj2var(x): assert x[0] == 'var'; return x[1]
+def obj2thm(x): assert x[0] == 'thm'; return x[1]
+def obj2list(x): assert x[0] == 'list'; return x[1]
+
+def pop_num(): return obj2num(pop_obj())
+def pop_name(): return obj2name(pop_obj())
+def pop_const(): return obj2const(pop_obj())
+def pop_typeop(): return obj2typeop(pop_obj())
+def pop_type(): return obj2type(pop_obj())
+def pop_term(): return obj2term(pop_obj())
+def pop_var(): return obj2var(pop_obj())
+def pop_thm(): return obj2thm(pop_obj())
+def pop_list(): return obj2list(pop_obj())
+
+def push_num(x): push_obj(('num',x))
+def push_name(x): push_obj(('name',x))
+def push_const(x): push_obj(('const',x))
+def push_typeop(x): push_obj(('typeop',x))
+def push_type(x): push_obj(('type',x))
+def push_term(x): push_obj(('term',x))
+def push_var(x): push_obj(('var',x))
+def push_thm(x): push_obj(('thm',x))
+def push_list(x): push_obj(('list',x))
+
+# ===== object management
+
+def pragma():
+  pop_obj()
+
+def cons():
+  t = pop_list()
+  h = pop_obj()
+  push_list((h,)+t)
+
+def dictadd(): # "def"
+  k = pop_num()
+  x = pop_obj()
+  D[k] = x
+  push_obj(x)
+
+def hdTl():
+  ht = pop_list()
+  push_obj(ht[0])
+  push_list(ht[1:])
+
+def nil():
+  result = ()
+  push_list(result)
+
+def pop():
+  pop_obj()
+
+def ref():
+  k = pop_num()
+  push_obj(D[k])
+
+def remove():
+  k = pop_num()
+  push_obj(D[k])
+  del D[k]
+
+# ===== name management
+
+def converttermname(n):
+  if n == 'select': n = '@'
+  if n.startswith('Data.Bool.'): n = n[10:]
+  # XXX: remove namespaces more broadly?
+  # XXX: do more conversions to HOL Light syntax?
+  return n
+
+def const():
+  n = converttermname(pop_name())
+  push_const(n)
+
+def typeOp():
+  n = pop_name()
+  if n == '->': n = type.FUN
+  push_typeop(n)
+
+# ===== building types
+
+def opType():
+  x = tuple(map(obj2type,pop_list()))
+  app = pop_typeop()
+  push_type(type.app(app,*x))
+
+def varType():
+  push_type(type.var(pop_name()))
+
+# ===== building terms
+
+def absTerm():
+  b = pop_term()
+  v = pop_var()
+  push_term(term.mapsto(v,b))
+
+def appTerm():
+  x = pop_term()
+  f = pop_term()
+  push_term(term.eval(f,x))
+
+def constTerm():
+  ty = pop_type()
+  c = pop_const()
+  push_term(term.const(c,ty))
+
+def var():
+  ty = pop_type()
+  n = converttermname(pop_name())
+  push_var(term.var(n,ty))
+
+def varTerm():
+  v = pop_var()
+  push_term(v)
+
+# ===== inferences
+
+def assume():
+  tm = pop_term()
+  push_thm(ASSUME(tm))
+
+def refl():
+  tm = pop_term()
+  push_thm(REFL(tm))
+
+def betaConv():
+  tm = pop_term()
+  push_thm(BETA_CONV(tm))
+
+def appThm():
+  TH = pop_thm()
+  th = pop_thm()
+  push_thm(MK_COMB(th,TH))
+
+def deductAntisym():
+  TH = pop_thm()
+  th = pop_thm()
+  push_thm(DEDUCT_ANTISYM_RULE(th,TH))
+
+def eqMp():
+  TH = pop_thm()
+  th = pop_thm()
+  push_thm(EQ_MP(th,TH))
+
+def trans():
+  TH = pop_thm()
+  th = pop_thm()
+  push_thm(TRANS(th,TH))
+
+def proveHyp():
+  TH = pop_thm()
+  th = pop_thm()
+  push_thm(PROVE_HYP(th,TH))
+
+def sym():
+  th = pop_thm()
+  push_thm(SYM(th))
+
+def axiom():
+  C = pop_term()
+  H = tuple(map(obj2term,pop_list()))
+  result = H,C
+  if result not in T:
+    assert len(H) == 0
+    result = AXIOM(C)
+  push_thm(result)
+
+def absThm():
+  th = pop_thm()
+  v = pop_var()
+  push_thm(ABS(v,th))
+
+def subst():
+  th = pop_thm()
+  todo = pop_list()
+  tytodo,vtodo = map(obj2list,todo)
+
+  tysubst = [(type.var(obj2name(n)),obj2type(ty)) for n,ty in map(obj2list,tytodo)]
+  th = INST_TYPE(th,tysubst)
+
+  vsubst = [(obj2var(v),obj2term(t)) for v,t in map(obj2list,vtodo)]
+  th = INST(th,vsubst)
+
+  push_thm(th)
+
+# ===== theorem naming
+
+thmnumber = 0
+
+def thm():
+  global thmnumber
+
+  newC = pop_term()
+  newH = tuple(map(obj2term,pop_list()))
+  th = pop_thm()
+
+  th = ALPHA_THM(th,newH,newC)
+
+  T.add(th)
+  thmnumber += 1
+  NAME(th,f'T{thmnumber}')
+
+# ===== definitions
+
+constname2def = {}
+
+def defineConst():
+  t = pop_term()
+  name = converttermname(pop_name())
+  push_const(name)
+  if name in constname2def:
+    result = constname2def[name]
+    assert len(result[0]) == 0
+    assert result[1] == term.eq(term.const(name,term.ty(t)),t)
+  else:
+    c = term.var(name,term.ty(t))
+    ct = term.eq(c,t)
+    result = NEW_DEFINITION(ct,name)
+    constname2def[name] = result
+  push_thm(result)
+
+def defineConstList():
+  th = pop_thm()
+  nvlist = pop_list()
+
+  v2t = {}
+  for h in th[0]:
+    v,t = term.eq_split(h)
+    if v in v2t: raise Exception(f'defineConstList repeated variable {v}')
+    v2t[v] = t
+
+  # XXX: this is defining constants more specifically than defineConstList does
+
+  constlist = ()
+  vsubst = ()
+  n2thm = {}
+  for n,v in map(obj2list,nvlist):
+    n,v = obj2name(n),obj2var(v)
+    if n in constname2def:
+      result = constname2def[n]
+    else:
+      result = NEW_DEFINITION(term.eq(term.var(n,term.ty(v)),v2t[v]),n)
+      constname2def[n] = result
+    assert len(result[0]) == 0
+    assert result[1] == term.eq(term.const(n,term.ty(v)),v2t[v])
+    n2thm[n] = result
+    C = term.const(n,term.ty(v2t[v]))
+    constlist += ('const',n),
+    vsubst += (v,C),
+
+  th = INST(th,vsubst)
+  # th now looks like: C1 = t1, ... |-> vsubst(phi)
+
+  for n in n2thm:
+    th = PROVE_HYP(n2thm[n],th)
+
+  assert len(th[0]) == 0
+
+  push_list(constlist)
+  push_thm(th)
+
+# ===== type definitions
+
+typename2def = {}
+
+def defineTypeOp():
+  H,C = pop_thm()
+  # XXX: does sorting change the opentheory semantics?
+  tyvarnames = tuple(sorted(set(map(obj2name,pop_list()))))
+  repname = converttermname(pop_name())
+  absname = converttermname(pop_name())
+  abstypename = pop_name()
+
+  if abstypename in typename2def:
+    absthm,repthm,absthm2,repthm2 = typename2def[abstypename]
+    # XXX: check consistency
+  else:
+    repprop,witness = term.eval_funpoint(C)
+    reptype = term.ty(witness)
+    absthm,repthm = TYPE_DEFINITION(reptype,repprop,(H,C),abstypename,absname,repname,tyvarnames)
+
+    tyvars = tuple(map(type.var,tyvarnames))
+    abstype = type.app(abstypename,*tyvars)
+    a = term.var('a',abstype)
+    r = term.var('r',reptype)
+    absthm2 = ABS(a,absthm)
+    repthm2 = SYM(ABS(r,repthm))
+
+    typename2def[abstypename] = absthm,repthm,absthm2,repthm2
+
+  push_typeop(abstypename)
+  push_const(absname)
+  push_const(repname)
+  if ot_version == 6:
+    push_thm(absthm2)
+    push_thm(repthm2)
+  else:
+    push_thm(absthm)
+    push_thm(repthm)
+
+# ===== driver
+
+commands = {
+  'absTerm':absTerm,
+  'absThm':absThm,
+  'appTerm':appTerm,
+  'appThm':appThm,
+  'assume':assume,
+  'axiom':axiom,
+  'betaConv':betaConv,
+  'cons':cons,
+  'const':const,
+  'constTerm':constTerm,
+  'deductAntisym':deductAntisym,
+  'def':dictadd,
+  'defineConst':defineConst,
+  'defineConstList':defineConstList,
+  'defineTypeOp':defineTypeOp,
+  'eqMp':eqMp,
+  'hdTl':hdTl,
+  'nil':nil,
+  'opType':opType,
+  'pop':pop,
+  'pragma':pragma,
+  'proveHyp':proveHyp,
+  'ref':ref,
+  'refl':refl,
+  'remove':remove,
+  'subst':subst,
+  'sym':sym,
+  'thm':thm,
+  'trans':trans,
+  'typeOp':typeOp,
+  'var':var,
+  'varTerm':varTerm,
+  'varType':varType,
+}
+
+def unbackslash(s):
+  result = ''
+  afterbackslash = False
+  for c in s:
+    if afterbackslash:
+      result += c
+      afterbackslash = False
+    elif c == '\\':
+      afterbackslash = True
+    else:
+      result += c
+  return result
+
+sys.stdout.buffer.write(b'HOLTrace 1\n')
+
+dir = sys.argv[1]
+packages_available = sorted(os.listdir(dir))
+packages_started = []
+packages_finished = set()
+
+stat_bytes = 0
+stat_lines = 0
+stat_commands = 0
+
+def dopackage(p):
+  global S
+  global D
+  global ot_version
+  global stat_bytes
+  global stat_lines
+  global stat_commands
+
+  if p in packages_available:
+    pack = '-'.join(p.split('-')[:-1])
+    package = p
+  else:
+    package = None
+    for q in packages_available:
+      if '-'.join(q.split('-')[:-1]) == p:
+        pack = p
+        package = q
+        # XXX: how is order defined for multiple versions of same package?
+    if package is None: raise Exception(f'package {p} not found')
+
+  if package in packages_finished: return
+  if package in packages_started:
+    raise Exception(f'loop with package {package}: {packages_started}')
+
+  packages_started.append(package)
+  sys.stderr.write(f'handling {package}\n')
+
+  artfile = None
+
+  pack = '-'.join(package.split('-')[:-1])
+  with open(f'{dir}/{package}/{pack}.thy') as f:
+    for line in f:
+      line = line.split()
+      if line[:1] == ['package:']:
+        dopackage(line[1])
+      if line[:1] == ['requires:']:
+        dopackage(line[1])
+      if line[:1] == ['article:']:
+        artfile = line[1]
+        assert len(artfile) >= 2 and artfile.startswith('"') and artfile.endswith('"')
+        artfile = artfile[1:-1]
+
+  if artfile is not None:
+    with open(f'{dir}/{package}/{artfile}') as f:
+      ot_version = 5
+      S = []
+      D = {}
+      # do not reset T: want to remember theorems from other files
+      firstcommand = True
+      for line in f:
+        stat_bytes += len(line)
+        stat_lines += 1
+        if line[:1] == '#': continue
+        line = line.strip()
+        if watch:
+          for spos,s in enumerate(S):
+            sys.stderr.write(f'stack {spos} {format_obj(s)}\n')
+          sys.stderr.write(f'processing {line}\n')
+        if line == 'version':
+          assert firstcommand
+          ot_version = pop_num()
+          firstcommand = False
+        elif line in commands:
+          stat_commands += 1
+          commands[line]()
+          firstcommand = False
+        elif line[:1] == '"':
+          assert line[-1:] == '"'
+          assert len(line) >= 2
+          push_name(unbackslash(line[1:-1]))
+        else:
+          push_num(int(line))
+
+  assert packages_started.pop() == package
+  packages_finished.add(package)
+
+for package in sys.argv[2:]:
+  dopackage(package)
+
+sys.stderr.write(f'finished bytes {stat_bytes} lines {stat_lines} commands {stat_commands}\n')

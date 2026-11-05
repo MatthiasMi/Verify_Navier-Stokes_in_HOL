@@ -1,0 +1,432 @@
+#!/usr/bin/env pypy3
+
+import sys
+sys.setrecursionlimit(1000000)
+
+def parse_nonneg(s):
+  result = 0
+  while len(s) > 0:
+    c = s[0]
+    if c == 32:
+      return result,s[1:]
+    if c >= 48 and c <= 57:
+      result = 32*result+c-48
+      s = s[1:]
+      continue
+    if c >= 65 and c <= 86:
+      result = 32*result+c-55
+      s = s[1:]
+      continue
+    break
+  return result,s
+      
+def parse_allowneg(s,id):
+  if s[:1] == b'-':
+    n,s = parse_nonneg(s[1:])
+    return id-n,s
+  return parse_nonneg(s)
+
+symbol2int = {
+  b'!':1,
+  b'@':2,
+  b'#':3,
+  b'$':4,
+  b'%':5,
+  b'^':6,
+  b'&':7,
+  b'*':8,
+  b'(':9,
+  b')':10,
+}
+
+def parse_core(s,id):
+  if len(s) == 0: return 0,s
+  c = s[:1]
+  if c in symbol2int:
+    return id-symbol2int[c],s[1:]
+  return parse_allowneg(s,id)
+
+def parse_num(s,id,toobig):
+  slen = len(s)
+  n,s = parse_core(s,id)
+  assert len(s) < slen
+  assert n < toobig or toobig < 0
+  return n,s
+
+def parse_subid(s,id):
+  return parse_num(s,id,id)
+
+intencode_bytes = b'0123456789ABCDEFGHIJKLMNOPQRSTUV'
+
+def simpleencode(x):
+  if isinstance(x,bytes): return x
+  if isinstance(x,int):
+    if x == 0: return b'0'
+    if x < 0: return b'-'+simpleencode(-x)
+    result = b''
+    while x > 0:
+      d = x%32
+      result += intencode_bytes[d:d+1]
+      x //= 32
+    return result[::-1]
+  return str(x).encode()
+
+def log(data):
+  result = b''
+  for x in data[1:]:
+    if x is None: continue
+    x = simpleencode(x)
+    if x == b'': continue
+    if x[:1] in intencode_bytes+b' ':
+      if len(result) > 0:
+        if result[-1:] in intencode_bytes:
+          result += b' '
+    result += x
+  assert len(data[0]) == 1
+  result = data[0]+result+b'\n'
+  sys.stdout.buffer.write(result)
+
+def compress(x,reference):
+  if not isinstance(x,int): return x
+  assert x >= 0
+  if x == reference-1: return b'!'
+  if x == reference-2: return b'@'
+  if x == reference-3: return b'#'
+  if x == reference-4: return b'$'
+  if x == reference-5: return b'%'
+  if x == reference-6: return b'^'
+  if x == reference-7: return b'&'
+  if x == reference-8: return b'*'
+  if x == reference-9: return b'('
+  if x == reference-10: return b')'
+  y = x-reference
+  if y < 0 and len(simpleencode(y)) <= len(simpleencode(x)):
+    return y
+  return x
+
+def doit(opts):
+  opts = set(opts)
+
+  types = []
+  terms = []
+  thms = []
+  infs = []
+  typedefs = []
+  thm2inf = {}
+  thm2name = {}
+  const2inf = {}
+  app2inf = {}
+
+  const2inf[b'='] = None
+  const2inf[b'@'] = None
+  app2inf[b'bool'] = None
+  app2inf[b'fun'] = None
+  app2inf[b'ind'] = None
+
+  todo = []
+
+  firstline = True
+
+  for line in sys.stdin.buffer:
+    if not line.endswith(b'\n'):
+      raise Exception('final newline is required')
+    line = line[:-1]
+    if len(line) < 1:
+      raise Exception('blank line is prohibited')
+    for c in line:
+      if c < 32 or c > 126:
+        raise Exception(f'byte {c} is prohibited')
+
+    if firstline:
+      if line != b'HOLTrace 1':
+        raise Exception(f'first line is not HOLTrace 1')
+      firstline = False
+      continue
+
+    tag,s = line[:1],line[1:]
+    todo += [tag]
+
+    if tag == b'a':
+      types += [(tag,s)]
+    elif tag == b'b':
+      numargs,s = parse_subid(s,-1)
+      result = tag,
+      while numargs > 0:
+        arg,s = parse_subid(s,len(types))
+        result += arg,
+        numargs -= 1
+      result += s,
+      assert s in app2inf
+      types += [result]
+    elif tag in (b'c',b'd'):
+      ty,s = parse_subid(s,len(types))
+      if tag == b'c':
+        assert s in const2inf
+      terms += [(tag,ty,s)]
+    elif tag in (b'e',b'f'):
+      tt,s = parse_subid(s,len(types))
+      t0,s = parse_subid(s,len(terms))
+      t1,s = parse_subid(s,len(terms))
+      assert len(s) == 0
+      terms += [(tag,tt,t0,t1)]
+    elif tag == b't':
+      if len(infs) == 0:
+        raise Exception('must have inference before first t line')
+      thm2inf[len(thms)] = len(infs)-1
+      result = tag,
+      while len(s) > 0:
+        arg,s = parse_subid(s,len(terms))
+        result += arg,
+      thms += [result]
+    elif tag == b'/':
+      t0,s = parse_subid(s,len(thms))
+      if t0 not in thm2name:
+        thm2name[t0] = []
+      thm2name[t0] += [s]
+    elif tag in (b',',b';'):
+      pass
+    elif tag in (b'X',b'B',b'R',b'U'):
+      t0,s = parse_subid(s,len(terms))
+      assert len(s) == 0
+      infs += [(tag,t0)]
+    elif tag in (b'P',b'V',b'Z',b'E'):
+      t0,s = parse_subid(s,len(thms))
+      t1,s = parse_subid(s,len(thms))
+      assert len(s) == 0
+      infs += [(tag,t0,t1)]
+    elif tag == b'F':
+      t0,s = parse_subid(s,len(terms))
+      t1,s = parse_subid(s,len(thms))
+      assert len(s) == 0
+      infs += [(tag,t0,t1)]
+    elif tag == b'S':
+      t0,s = parse_subid(s,len(thms))
+      result = tag,t0
+      while len(s) > 0:
+        t1,s = parse_subid(s,len(terms))
+        result += t1,
+      infs += [result]
+    elif tag == b'T':
+      t0,s = parse_subid(s,len(thms))
+      result = tag,t0
+      while len(s) > 0:
+        t1,s = parse_subid(s,len(types))
+        result += t1,
+      infs += [result]
+    elif tag == b'C':
+      t0,s = parse_subid(s,len(terms))
+      if s in const2inf:
+        sys.stderr.write(f'const2inf collision {s}\n')
+      assert s not in const2inf
+      const2inf[s] = len(infs)
+      infs += [(tag,t0,s)]
+    elif tag == b'A':
+      t0,s = parse_subid(s,len(types))
+      t1,s = parse_subid(s,len(terms))
+      t2,s = parse_subid(s,len(thms))
+      prefix,abstypename,absname,repname = s.split(b']')[:4]
+      if prefix == b'':
+        assert absname not in const2inf
+        assert repname not in const2inf
+        const2inf[absname] = len(infs)
+        const2inf[repname] = len(infs)
+        assert abstypename not in app2inf
+        app2inf[abstypename] = len(infs)
+      typedefs += [len(infs)]
+      infs += [(tag,t0,t1,t2,s)]
+    elif tag == b'D':
+      t0,s = parse_subid(s,len(typedefs))
+      infs += [(tag,t0)]
+    else:
+      raise Exception(f'unrecognized tag {tag}')
+
+  if firstline:
+    raise Exception(f'empty file')
+
+  # ===== figure out which lines we want to print
+
+  wanttype = [False]*len(types)
+  wantterm = [False]*len(terms)
+  wantthm = [False]*len(thms)
+  wantinf = [False]*len(infs)
+  wanttypedef = [False]*len(typedefs)
+
+  def mark_type(id):
+    if wanttype[id]: return
+    wanttype[id] = True
+    x = types[id]
+    if x[0] == b'b':
+      if app2inf[x[-1]] is not None:
+        mark_inf(app2inf[x[-1]])
+      for t in x[1:-1]: mark_type(t)
+
+  def mark_term(id):
+    if wantterm[id]: return
+    wantterm[id] = True
+    x = terms[id]
+    tag = x[0]
+    mark_type(x[1])
+    if tag in (b'c',b'd'):
+      if tag == b'c':
+        if const2inf[x[2]] is not None:
+          mark_inf(const2inf[x[2]])
+    else:
+      assert tag in (b'e',b'f')
+      mark_term(x[2])
+      mark_term(x[3])
+
+  def mark_thm(id):
+    if wantthm[id]: return
+    wantthm[id] = True
+    x = thms[id]
+    tag = x[0]
+    assert tag == b't'
+    for t in x[1:]: mark_term(t)
+    mark_inf(thm2inf[id])
+
+  def mark_inf(id):
+    if wantinf[id]: return
+    wantinf[id] = True
+    x = infs[id]
+    tag = x[0]
+    if tag in (b'X',b'B',b'R',b'U',b'C'):
+      mark_term(x[1])
+    elif tag in (b'P',b'V',b'Z',b'E'):
+      mark_thm(x[1])
+      mark_thm(x[2])
+    elif tag == b'F':
+      mark_term(x[1])
+      mark_thm(x[2])
+    elif tag == b'S':
+      mark_thm(x[1])
+      for t in x[2:]: mark_term(t)
+    elif tag == b'T':
+      mark_thm(x[1])
+      for t in x[2:]: mark_type(t)
+    elif tag == b'A':
+      mark_type(x[1])
+      mark_term(x[2])
+      mark_thm(x[3])
+    else:
+      assert tag == b'D'
+      mark_typedef(x[1])
+
+  def mark_typedef(id):
+    if wanttypedef[id]: return
+    wanttypedef[id] = True
+    mark_inf(typedefs[id])
+
+  for t0 in thm2name:
+    if len(opts) != 0: # 0 means everything
+      if all(n.decode() not in opts for n in thm2name[t0]):
+        continue
+    mark_thm(t0)
+
+  # ===== print the marked lines (in the same order as before)
+
+  sys.stdout.buffer.write(b'HOLTrace 1\n')
+
+  type2newid = [None]*len(types)
+  oldtypeid = 0
+  newtypeid = 0
+  term2newid = [None]*len(terms)
+  oldtermid = 0
+  newtermid = 0
+  thm2newid = [None]*len(thms)
+  oldthmid = 0
+  newthmid = 0
+  inf2newid = [None]*len(infs)
+  oldinfid = 0
+  newinfid = 0
+  typedef2newid = [None]*len(typedefs)
+  oldtypedefid = 0
+  newtypedefid = 0
+
+  def typeout(t): return compress(type2newid[t],newtypeid)
+  def termout(t): return compress(term2newid[t],newtermid)
+  def thmout(t): return compress(thm2newid[t],newthmid)
+  def infout(t): return compress(inf2newid[t],newinfid)
+  def typedefout(t): return compress(typedef2newid[t],newtypedefid)
+
+  def print_type(x):
+    tag = x[0]
+    if tag == b'a':
+      log(x)
+    else:
+      assert tag == b'b'
+      result = tag,len(x)-2
+      result += tuple(map(typeout,x[1:-1]))
+      result += x[-1:]
+      log(result)
+
+  def print_term(x):
+    tag = x[0]
+    if tag in (b'c',b'd'):
+      log((tag,typeout(x[1]),x[2]))
+    else:
+      assert tag in (b'e',b'f')
+      log((tag,typeout(x[1]),termout(x[2]),termout(x[3])))
+
+  def print_thm(x):
+    tag = x[0]
+    assert tag == b't'
+    log((tag,)+tuple(map(termout,x[1:])))
+
+  def print_inf(x):
+    tag = x[0]
+    if tag in (b'X',b'B',b'R',b'U'):
+      log((tag,termout(x[1])))
+    elif tag in (b'P',b'V',b'Z',b'E'):
+      log((tag,thmout(x[1]),thmout(x[2])))
+    elif tag == b'F':
+      log((tag,termout(x[1]),thmout(x[2])))
+    elif tag == b'S':
+      log(((tag,thmout(x[1]))+tuple(map(termout,x[2:]))))
+    elif tag == b'T':
+      log(((tag,thmout(x[1]))+tuple(map(typeout,x[2:]))))
+    elif tag == b'C':
+      log((tag,termout(x[1]),x[2]))
+    elif tag == b'A':
+      log((tag,typeout(x[1]),termout(x[2]),thmout(x[3]),x[4]))
+    else:
+      assert tag == b'D'
+      log((tag,typedefout(x[1])))
+
+  for tag in todo:
+    if tag in (b'a',b'b'):
+      if wanttype[oldtypeid]:
+        print_type(types[oldtypeid])
+        type2newid[oldtypeid] = newtypeid
+        newtypeid += 1
+      oldtypeid += 1
+    elif tag in (b'c',b'd',b'e',b'f'):
+      if wantterm[oldtermid]:
+        print_term(terms[oldtermid])
+        term2newid[oldtermid] = newtermid
+        newtermid += 1
+      oldtermid += 1
+    elif tag == b't':
+      if wantthm[oldthmid]:
+        print_thm(thms[oldthmid])
+        thm2newid[oldthmid] = newthmid
+        newthmid += 1
+        if oldthmid in thm2name:
+          for n in thm2name[oldthmid]:
+            log((b'/',thmout(oldthmid),n))
+      oldthmid += 1
+    elif tag in (b'A',b'B',b'C',b'D',b'E',b'F',b'P',b'R',b'S',b'T',b'U',b'V',b'X',b'Z'):
+      if wantinf[oldinfid]:
+        print_inf(infs[oldinfid])
+        inf2newid[oldinfid] = newinfid
+        newinfid += 1
+        if tag == b'A':
+          typedef2newid[oldtypedefid] = newtypedefid
+          newtypedefid += 1
+      oldinfid += 1
+      if tag == b'A': oldtypedefid += 1
+    elif tag in (b'/',b',',b';'):
+      pass
+    else:
+      raise Exception(f'unrecognized tag {tag}')
+
+doit(sys.argv[1:])

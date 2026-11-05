@@ -1,0 +1,213 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style type="text/css">
+html{overflow-y:scroll;background-color:#505050}
+body{font-family:"Noto Sans","Droid Sans","DejaVu Sans","Arial",sans-serif;line-height:1.5}
+tt,code{background-color:#f0f0f0;font-family:"Noto Sans Mono","Droid Sans Mono","DejaVu Sans Mono","Courier New",monospace,sans-serif;font-size:1em;}
+pre{margin-left:3em}
+p,ul,ol,blockquote,pre{font-size:1.0em;line-height:1.6}
+li p{font-size:1.0em}
+blockquote p{font-size:1.0em}
+h1{font-size:1.5em}
+h2{font-size:1.3em}
+h3{font-size:1.0em}
+h1 a{text-decoration:none}
+table{border-collapse:collapse}
+th,td{border:1px solid black}
+table a{text-decoration:none}
+table tr{font-size:1.0em;line-height:1.6em}
+table tr{font-size:1.0em;line-height:1.5}
+tbody tr:nth-child(12n+1){background-color:#f0ffff}
+tbody tr:nth-child(12n+2){background-color:#f0ffff}
+tbody tr:nth-child(12n+3){background-color:#f0ffff}
+tbody tr:nth-child(12n+4){background-color:#f0ffff}
+tbody tr:nth-child(12n+5){background-color:#f0ffff}
+tbody tr:nth-child(12n+6){background-color:#f0ffff}
+tbody tr:nth-child(12n+7){background-color:#fffff0}
+tbody tr:nth-child(12n+8){background-color:#fffff0}
+tbody tr:nth-child(12n+9){background-color:#fffff0}
+tbody tr:nth-child(12n+10){background-color:#fffff0}
+tbody tr:nth-child(12n+11){background-color:#fffff0}
+tbody tr:nth-child(12n+12){background-color:#fffff0}
+
+#headline{display:block;margin:0;padding:0;color:#ffffff;background-color:#505050}
+#headline .text{font-weight:bold;font-size:1.0em}
+#headline input{display:none}
+#nav ul{margin:0;padding:0}
+#nav li{list-style-type:none;margin:0;padding:0}
+.navtop{padding-bottom:0.5em;font-weight:bold;font-size:1.0em}
+.navtop{background-color:#505050;color:#ffffff}
+#nav .here{background-color:#505050;color:#ffffff}
+#nav .away{background-color:#505050;color:#ffffff}
+#nav .away a{text-decoration:none;display:block;color:#ffffff}
+#nav .away a:hover,.away a:active{text-decoration:underline}
+#hidemenu{visibility:hidden;display:none;overflow:hidden;position:fixed;top:0;left:0;height:100%;width:100%}
+
+.main{padding:5px}
+.main{background-color:#ffffff}
+.pagetitle{font-size:1.4em;font-weight:bold}
+@media only screen and (min-width:512px) {
+  .navtop{padding-top:5px}
+  #headline{top:0;margin:0;width:160px;height:100%;position:fixed;overflow:auto}
+  #headline .noselect{display:none}
+  #headline #nav{visibility:visible;display:block;width:auto;height:auto}
+  .main{margin-left:170px}
+  #headline #hidemenu{visibility:hidden}
+}
+@media not screen and (min-width:512px) {
+  #headline .noselect{-webkit-user-select:none;-ms-user-select:none;user-select:none;}
+  #headline #nav #navbot{visibility:hidden;position:fixed;top:0;left:-70%;z-index:2;transition:0.2s;margin:0;padding:0}
+  #headline input:checked ~ #nav #navbot{height:100%;position:fixed;top:0;left:0;visibility:visible;display:block;box-sizing:border-box;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;vertical-align:center;font-size:1.0em;width:70%;overflow:auto}
+  #headline input:checked ~ #hidemenu{visibility:visible;display:block;background:black;opacity:0.3;z-index:1}
+}
+</style>
+<title>
+HOLTrace: Literature</title>
+</head>
+<body>
+<label id=headline>
+<input type=checkbox />
+<nav id=nav>
+<div class=navtop>
+<span class=noselect>≡</span>
+HOLTrace</div>
+<ul id=navbot>
+<li class=away><a href=index.html>Intro</a>
+</li><li class=away><a href=download.html>Download</a>
+</li><li class=away><a href=install.html>Install</a>
+</li><li class=away><a href=test.html>Test</a>
+</li><li class=away><a href=save.html>Save</a>
+</li><li class=away><a href=prune.html>Prune</a>
+</li><li class=away><a href=verify.html>Verify</a>
+</li><li class=away><a href=tex.html>TeX</a>
+</li><li class=away><a href=ml.html>ML REPL</a>
+</li><li class=away><a href=prooftrace.html>ProofTrace</a>
+</li><li class=away><a href=opentheory.html>OpenTheory</a>
+</li><li class=away><a href=format.html>Format</a>
+</li><li class=away><a href=license.html>License</a>
+</li><li class=here>Literature
+</li></ul></nav>
+<div id=hidemenu></div>
+</label>
+<div class=main>
+<div class=pagetitle>HOLTrace: Literature</div>
+<p>This bibliography is split into the following sections:
+<a href="#assistants">some proof assistants</a>;
+computer-checked <a href="#english">proofs in English</a>;
+more <a href="#format">format converters and verifiers</a>.
+Each section lists references in chronological order.</p>
+<h2 id="assistants">Some proof assistants</h2>
+<p><a href="https://research.tue.nl/en/publications/automath-a-language-for-mathematics">1968 de Bruijn</a>:
+Automath.</p>
+<p><a href="https://fm.mizar.org/mizar-archive/1975/Ilmenau-Heft33.pdf">1973 Trybulec</a>:
+<a href="https://mizar.org">Mizar</a>.</p>
+<p>1986 Constable–Allen–Bromley–Cleaveland–Cremer–Harper–Howe–Knoblock–Mendler–Panangaden–Sasaki–Smith:
+<a href="https://nuprl-web.cs.cornell.edu/">Nuprl</a>.</p>
+<p><a href="https://www.cs.ox.ac.uk/tom.melham/pub/Gordon-1993-ITH.html">1993 Gordon–Melham</a>:
+HOL88.</p>
+<p><a href="https://www.cl.cam.ac.uk/~jrh13/papers/demo.html">1996 Harrison</a>:
+<a href="https://hol-light.github.io/">HOL Light</a>.</p>
+<p>1997 Megill:
+<a href="https://us.metamath.org/">Metamath</a>.</p>
+<p><a href="https://isabelle.in.tum.de/dist/Isabelle/doc/tutorial.pdf">2002 Nipkow–Paulson–Wenzel</a>:
+<a href="https://isabelle.in.tum.de/">Isabelle</a>/HOL.</p>
+<p><a href="https://link.springer.com/book/10.1007/978-3-662-07964-5">2004 Bertot–Castéran</a>:
+Coq, subsequently renamed <a href="https://rocq-prover.org/">Rocq</a>.</p>
+<p><a href="https://trustworthy.systems/publications/">2008 Slind–Norrish</a>:
+<a href="https://hol-theorem-prover.org/">HOL4</a>.</p>
+<p><a href="https://link.springer.com/chapter/10.1007/978-3-319-20615-8_17">2015 Bancerek–Bylinski–Grabowski–Kornilowicz–Matuszewski–Naumowicz–Pak–Urban</a>:
+survey of the Mizar language.</p>
+<p><a href="https://mizar.uwb.edu.pl/people/romat/doi-10.1007-s10817-017-9440-6.pdf">2018 Bancerek–Bylinski–Grabowski–Kornilowicz–Matuszewski–Naumowicz–Pak</a>:
+survey of the Mizar math library.</p>
+<p><a href="https://arxiv.org/abs/1910.09336">2020 The mathlib community</a>:
+the Lean math library.</p>
+<p><a href="https://lean-lang.org/papers/lean4.pdf">2021 de Moura–Ullrich</a>:
+the Lean 4 <a href="https://lean-lang.org/">language</a>.</p>
+<p><a href="https://arxiv.org/abs/2304.08391">2023 Carneiro</a>:
+an open-source <a href="https://github.com/digama0/mizar-rs">reimplementation</a>
+of Mizar.</p>
+<h2 id="english">Computer-checked proofs in English</h2>
+<p><a href="https://www.sciencedirect.com/science/article/abs/pii/0004370276900072">1976 Chester</a>:
+a program EXPOUND
+to convert inference sequences into English proofs.</p>
+<p><a href="https://www.site.uottawa.ca/~afelty/dist/proof87.pdf">1987 Felty–Miller</a>:
+the χ-proof system,
+with extra information attached to inferences to improve presentation as English proofs.</p>
+<p><a href="https://web.archive.org/web/20060101004342/http://www.cl.cam.ac.uk/%7Emjcg/papers/AvraAccountsPaper.ps.gz">1990 Cohn</a>:
+converting tactic sequences for HOL into English proofs.</p>
+<p><a href="https://inria.hal.science/inria-00074217/file/RR-2459.pdf">1995 Coscoy–Kahn–Thery</a>:
+a converter (part of ctcoq)
+to convert Coq inference sequences into English proofs,
+including various compression mechanisms.</p>
+<p><a href="https://link.springer.com/chapter/10.1007/BFb0052156">1997 Coscoy</a>:
+further compression mechanisms.</p>
+<p><a href="https://www.cs.columbia.edu/nlp/papers/1999/holland-minkley_al_99.pdf">1999 Holland-Minkley–Barzilay–Constable</a>:
+converting tactic sequences for Nuprl into English proofs.</p>
+<p><a href="https://www-users.york.ac.uk/paul.cairns/pubs/Maze.pdf">2005 Cairns–Gow</a>:
+a tool Maze
+to convert annotated Mizar proofs into English proofs.</p>
+<p><a href="https://ids-pub.bsz-bw.de/frontdoor/deliver/index/docId/8193/file/Cramer_Fisseni_Koepke_Kuehlwein_Schroeder_Veldman_The_Naproche_Project_2010.pdf">2009 Cramer–Fisseni–Koepke–Kühlwein–Schröder–Veldman</a>:
+Naproche,
+a system to computer-check some English proofs.</p>
+<p><a href="https://arxiv.org/pdf/1309.4501">2013 Ganesalingam–Gowers</a>:
+a tool to generate some types of proofs
+and convert them into English proofs.</p>
+<p><a href="https://arxiv.org/pdf/1712.03894">2017 Bedford</a>:
+a tool Coqatoo
+to convert tactic sequences for Coq into English proofs.</p>
+<h2 id="format">More format converters and verifiers</h2>
+<p><a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-306.html">1993 Wong</a>:
+a tool to record HOL88 inferences in a text format.</p>
+<p><a href="https://www.csl.sri.com/papers/proofchecker/">1995 Gordon–Herbert–Hale–Harrison–Wong–von Wright</a>:
+a tool to verify inferences recorded in that text format,
+and a proof that the algorithms used in the tool
+match a simpler description of inference verification.</p>
+<p><a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-389.html">1996 Wong</a>:
+a faster tool to verify inferences recorded in that text format.
+See also the <a href="https://link.springer.com/article/10.1023/A:1008643803725">journal version</a>.</p>
+<p><a href="https://nuprl-web.cs.cornell.edu/documents/Howe/ImportingMathematics.pdf">1996 Howe</a>:
+a tool to import HOL Light statements (not proofs) into Nuprl.</p>
+<p>2000 Denney:
+a prototype tool
+to import some HOL Light inferences (not definitions or type instantiations) into Coq.</p>
+<p><a href="https://static.aminer.org/pdf/PDF/000/071/753/importing_hol_into_isabelle_hol.pdf">2006 Obua–Skalberg</a>:
+ProofRecording to record HOL Light traces (this is maintained as part of the HOL Light distribution);
+a similar tool for HOL4;
+and a tool to replay ProofRecording files in Isabelle.
+There are (as in Wong's format) two types of ProofRecording traces:
+"BASIC" with only primitive inferences,
+and "EXTENDED" with some higher-level inferences such as <code>SYM</code>.</p>
+<p><a href="https://www.cs.cmu.edu/~seanmcl/papers/McLaughlin-IJCAR-2006.pdf">2006 McLaughlin</a>:
+a tool translating thousands of Isabelle proofs into HOL Light proofs.</p>
+<p><a href="https://inria.hal.science/inria-00520604/document">2010 Keller–Werner</a>:
+another HOL Light trace format to ProofRecording,
+and a tool to replay traces in that format inside Coq.</p>
+<p><a href="https://gilith.com/papers/stdlib.pdf">2011 Hurd</a>:
+OpenTheory as a format for HOL traces.
+The <a href="https://www.gilith.com/opentheory/">OpenTheory home page</a>
+links to tools to record inferences
+from HOL Light, HOL4, and ProofPower in OpenTheory format,
+and tools to replay inferences in HOL Light, HOL4, ProofPower, and Isabelle.
+(The HOLTrace package now provides another way to replay OpenTheory traces in HOL Light,
+since it has a <a href="opentheory.html">converter</a>
+from OpenTheory format to HOLTrace format.)</p>
+<p><a href="http://cl-informatik.uibk.ac.at/users/cek/docs/kaliszyk-itp13.pdf">2013 Kaliszyk–Krauss</a>:
+a more efficient format for HOL Light traces,
+and a tool to replay the traces in Isabelle.</p>
+<p><a href="https://link.springer.com/content/pdf/10.1007/s10817-021-09604-0.pdf">2021 Kohlhase–Rabe</a>:
+survey of work on exporting libraries from Coq, HOL Light, IMPS, Isabelle, Mizar, and PVS
+to a unified language, MMT.</p>
+<p><a href="https://core.ac.uk/download/pdf/543614031.pdf">2022 Abrahamsson</a>:
+an OpenTheory verifier (on top of Candle, on top of CakeML)
+with a proof that the machine code for the verifier
+allows only valid HOL theorems.</p>
+<p><a href="https://inria.hal.science/hal-04613926/">2024 Blanqui</a>:
+an export mechanism from HOL Light to Dedukti,
+and an import mechanism from Dedukti to Coq.</p><hr><font size=1><b>Version:</b>
+This is version 2025.06.30 of the "Literature" web page.
+</font>
+</div>
+</body>
+</html>
